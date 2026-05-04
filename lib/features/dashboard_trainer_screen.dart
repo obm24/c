@@ -9,7 +9,7 @@ import 'trainer_clients_screen.dart';
 
 import 'trainer_forms_screens.dart';
 import 'trainer_products_screen.dart';
-import 'posts_screen.dart';
+import 'f_posts_screen.dart';
 import 'trainer_analytics_screen.dart';
 
 // TIME-OF-DAY GREETING

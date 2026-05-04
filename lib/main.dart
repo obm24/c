@@ -13,6 +13,8 @@ import 'repositories/exercise_repository.dart';
 // Adjust path depending on your code generation/l10n setup
 import 'l10n/app_localizations.dart';
 
+import 'features/dashboard_trainee_screen.dart' as trainee_dashboard;
+import 'features/dashboard_trainer_screen.dart' as trainer_dashboard;
 import 'features/f_auth_screen.dart';
 import 'features/trainer_programmes_screen.dart';
 import 'models/programme.dart';
@@ -49,7 +51,7 @@ class TnTApp extends StatelessWidget {
           final role = state.pathParameters['role'] ?? 'Trainer';
           return AppMotion.goRouterPage(
             key: state.pageKey,
-            child: DashboardScreen(role: role),
+            child: _DashboardRoute(role: role),
           );
         },
       ),
@@ -66,7 +68,7 @@ class TnTApp extends StatelessWidget {
           final extra = state.extra;
           return AppMotion.goRouterPage(
             key: state.pageKey,
-            child: TrainingPlanBuilderScreen(
+            child: _TrainingPlanBuilderRoute(
               initialProgramme: extra is Programme ? extra : null,
             ),
           );
@@ -108,6 +110,70 @@ class TnTApp extends StatelessWidget {
             routerConfig: _router,
           );
         },
+      ),
+    );
+  }
+}
+
+class _DashboardRoute extends StatelessWidget {
+  final String role;
+
+  const _DashboardRoute({
+    required this.role,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final normalizedRole = role.trim().toLowerCase();
+    if (normalizedRole == 'trainee') {
+      return const trainee_dashboard.TraineeWorkoutPage();
+    }
+    return const trainer_dashboard.TrainerWorkoutPage();
+  }
+}
+
+class _TrainingPlanBuilderRoute extends StatelessWidget {
+  final Programme? initialProgramme;
+
+  const _TrainingPlanBuilderRoute({
+    this.initialProgramme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final title = AppLocalizations.of(context)?.trainingPlanBuilder ??
+        'Training Plan Builder';
+    final message = AppLocalizations.of(context)?.programmeBuilderComingSoon ??
+        'Programme builder coming soon.';
+
+    return Scaffold(
+      backgroundColor: AppTheme.bg,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppTheme.bg,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: AppTheme.textPrimary),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: AppTheme.brand,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            initialProgramme == null ? message : initialProgramme!.name,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
       ),
     );
   }

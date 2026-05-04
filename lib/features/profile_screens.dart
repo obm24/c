@@ -1011,9 +1011,6 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
   }
 
   Widget _buildCountryField(String label) {
-    // FIX #1: Use kCountriesOnly — entries that start with 'assets/images/flags/' — gives ALL countries, not just ones with old emoji parentheses.
-    // FIX #2: Render SVG flag via CountryFlagWidget in every dropdown item & selected value display.
-    // FIX #3: Subdivision field is ALWAYS rendered, disabled + placeholder text when no country chosen.
     final adminInfo = CountryAdminInfo.resolve(appState.profileCountry);
     final allCountries = AppConstants.kCountriesOnly.toSet().toList();
     final bool countryChosen = appState.profileCountry.isNotEmpty;
