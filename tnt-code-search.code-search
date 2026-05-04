@@ -1,0 +1,125 @@
+# Query: managyment
+
+86 results - 27 files
+
+analysis_full.txt:
+    1: Analyzing TnT...                                         
+  117:    info - The type name 'TnTApp' isn't an UpperCamelCase identifier - lib\main.dart:17:7 - camel_case_types
+
+analyze_output_utf8.txt:
+    1: Analyzing TnT...                                         
+  147:    info - The type name 'TnTApp' isn't an UpperCamelCase identifier - lib\main.dart:17:7 - camel_case_types
+
+analyze_output.txt:
+    1: Analyzing TnT...                                         
+  147:    info - The type name 'TnTApp' isn't an UpperCamelCase identifier - lib\main.dart:17:7 - camel_case_types
+
+analyze_output2.txt:
+    1: Analyzing TnT...                                         
+  147:    info - The type name 'TnTApp' isn't an UpperCamelCase identifier - lib\main.dart:17:7 - camel_case_types
+
+analyze_output3.txt:
+    1: Analyzing TnT...                                         
+  147:    info - The type name 'TnTApp' isn't an UpperCamelCase identifier - lib\main.dart:17:7 - camel_case_types
+
+analyze_res.txt:
+    1: Analyzing TnT...
+  120:    info - lib\main.dart:17:7 - The type name 'TnTApp' isn't an UpperCamelCase identifier. Try changing the name to follow the UpperCamelCase style. - camel_case_types
+
+package-lock.json:
+  2:   "name": "TnT",
+
+README.md:
+  1: # TnT
+
+android\app\build.gradle.kts:
+   9:     namespace = "com.TnT.TnT"
+  26:         applicationId = "com.TnT.TnT"
+
+android\app\src\main\AndroidManifest.xml:
+  3:         android:label="TnT"
+
+android\app\src\main\kotlin\com\TnT\TnT\MainActivity.kt:
+  1: package com.TnT.TnT
+
+ios\Runner\Info.plist:
+   8: 	<string>TnT</string>
+  16: 	<string>TnT</string>
+
+ios\Runner.xcodeproj\project.pbxproj:
+  371: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT;
+  387: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT.RunnerTests;
+  404: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT.RunnerTests;
+  419: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT.RunnerTests;
+  550: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT;
+  572: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT;
+
+lib\main.dart:
+  16:   runApp(const TnTApp());
+  19: class TnTApp extends StatelessWidget {
+  20:   const TnTApp({super.key});
+  29:               return AppLocalizations.of(context)?.appName ?? 'TnT';
+
+lib\features\clients_screens.dart:
+  195:                     child: Text('TnT.app/join/omarbinalmajd',
+  205:                           text: 'https://TnT.app/join/omarbinalmajd'));
+
+lib\features\trainee_public_profile_screen.dart:
+  761:                         'TnT.app/u/${widget.trainee['username']}',
+  773:                                 'https://TnT.app/u/${widget.trainee['username']}'));
+
+lib\features\trainer_public_profile_screen.dart:
+  312:         'https://TnT.app/t/${widget.trainer['username']}';
+
+linux\CMakeLists.txt:
+   7: set(BINARY_NAME "TnT")
+  10: set(APPLICATION_ID "com.TnT.TnT")
+
+linux\runner\my_application.cc:
+  43:     gtk_header_bar_set_title(header_bar, "TnT");
+  47:     gtk_window_set_title(window, "TnT");
+
+macos\Runner\Configs\AppInfo.xcconfig:
+   8: PRODUCT_NAME = TnT
+  11: PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT
+  14: PRODUCT_COPYRIGHT = Copyright © 2026 com.TnT. All rights reserved.
+
+macos\Runner.xcodeproj\project.pbxproj:
+   67: 		33CC10ED2044A3C60003C045 /* TnT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TnT.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+  134: 				33CC10ED2044A3C60003C045 /* TnT.app */,
+  220: 			productReference = 33CC10ED2044A3C60003C045 /* TnT.app */;
+  388: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT.RunnerTests;
+  391: 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TnT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TnT";
+  402: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT.RunnerTests;
+  405: 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TnT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TnT";
+  416: 				PRODUCT_BUNDLE_IDENTIFIER = com.TnT.TnT.RunnerTests;
+  419: 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TnT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TnT";
+
+macos\Runner.xcodeproj\xcshareddata\xcschemes\Runner.xcscheme:
+  18:                BuildableName = "TnT.app"
+  34:             BuildableName = "TnT.app"
+  69:             BuildableName = "TnT.app"
+  86:             BuildableName = "TnT.app"
+
+web\index.html:
+  26:   <meta name="apple-mobile-web-app-title" content="TnT">
+  32:   <title>TnT</title>
+
+web\manifest.json:
+  2:     "name": "TnT",
+  3:     "short_name": "TnT",
+
+windows\CMakeLists.txt:
+  3: project(TnT LANGUAGES CXX)
+  7: set(BINARY_NAME "TnT")
+
+windows\runner\main.cpp:
+  30:   if (!window.Create(L"TnT", origin, size)) {
+
+windows\runner\Runner.rc:
+  92:             VALUE "CompanyName", "com.TnT" "\0"
+  93:             VALUE "FileDescription", "TnT" "\0"
+  95:             VALUE "InternalName", "TnT" "\0"
+  96:             VALUE "LegalCopyright", "Copyright (C) 2026 com.TnT. All rights reserved." "\0"
+  97:             VALUE "OriginalFilename", "TnT.exe" "\0"
+  98:             VALUE "ProductName", "TnT" "\0"
