@@ -346,6 +346,198 @@ abstract class AppLocalizations {
   /// **'Please select your training experience.'**
   String get trainingExperienceRequired;
 
+  /// No description provided for @trainingExperienceSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Training experience selected.'**
+  String get trainingExperienceSelected;
+
+  /// No description provided for @trainingExperienceDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Experience'**
+  String get trainingExperienceDialogTitle;
+
+  /// No description provided for @trainingExperienceDialogIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This is personal physical training experience, not professional coaching.'**
+  String get trainingExperienceDialogIntro;
+
+  /// No description provided for @experienceLevelZeroYears.
+  ///
+  /// In en, this message translates to:
+  /// **'0 Years'**
+  String get experienceLevelZeroYears;
+
+  /// No description provided for @experienceLevelOneToTwoYears.
+  ///
+  /// In en, this message translates to:
+  /// **'1-2 Years'**
+  String get experienceLevelOneToTwoYears;
+
+  /// No description provided for @experienceLevelThreeToFiveYears.
+  ///
+  /// In en, this message translates to:
+  /// **'3-5 Years'**
+  String get experienceLevelThreeToFiveYears;
+
+  /// No description provided for @experienceLevelSixToNineYears.
+  ///
+  /// In en, this message translates to:
+  /// **'6-9 Years'**
+  String get experienceLevelSixToNineYears;
+
+  /// No description provided for @experienceLevelTenPlusYears.
+  ///
+  /// In en, this message translates to:
+  /// **'+10 Years'**
+  String get experienceLevelTenPlusYears;
+
+  /// No description provided for @experienceLevelZeroYearsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No consistent structured training yet.'**
+  String get experienceLevelZeroYearsDescription;
+
+  /// No description provided for @experienceLevelOneToTwoYearsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner/early foundation, learning consistency, basic form, and basic routines.'**
+  String get experienceLevelOneToTwoYearsDescription;
+
+  /// No description provided for @experienceLevelThreeToFiveYearsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate, familiar with structured training, progressive overload, and multiple exercise types.'**
+  String get experienceLevelThreeToFiveYearsDescription;
+
+  /// No description provided for @experienceLevelSixToNineYearsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced recreational trainee, long-term consistency and strong body awareness.'**
+  String get experienceLevelSixToNineYearsDescription;
+
+  /// No description provided for @experienceLevelTenPlusYearsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Highly experienced trainee with extensive long-term training exposure.'**
+  String get experienceLevelTenPlusYearsDescription;
+
+  /// No description provided for @selectMeasurementUnitsBeforeHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Select measurement units before entering your height.'**
+  String get selectMeasurementUnitsBeforeHeight;
+
+  /// No description provided for @selectMeasurementUnitsBeforeWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Select measurement units before entering your weight.'**
+  String get selectMeasurementUnitsBeforeWeight;
+
+  /// No description provided for @heightBoundaryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Height must be between {min} and {max} {unit}.'**
+  String heightBoundaryWarning(String min, String max, String unit);
+
+  /// No description provided for @weightBoundaryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight must be between {min} and {max} {unit}.'**
+  String weightBoundaryWarning(String min, String max, String unit);
+
+  /// No description provided for @fieldLooksGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks good.'**
+  String get fieldLooksGood;
+
+  /// No description provided for @selectionLooksGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection complete.'**
+  String get selectionLooksGood;
+
+  /// No description provided for @registrationRoleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select whether you are registering as a trainee or trainer.'**
+  String get registrationRoleRequired;
+
+  /// No description provided for @selectCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your country.'**
+  String get selectCountry;
+
+  /// No description provided for @measurementUnitsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select metric or imperial units.'**
+  String get measurementUnitsRequired;
+
+  /// No description provided for @dateOfBirthSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth selected.'**
+  String get dateOfBirthSelected;
+
+  /// No description provided for @genderSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender selected.'**
+  String get genderSelected;
+
+  /// No description provided for @measurementUnitsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement units selected.'**
+  String get measurementUnitsSelected;
+
+  /// No description provided for @traineeProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Trainee Profile'**
+  String get traineeProfile;
+
+  /// No description provided for @traineeProfileRegistrationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Help trainers understand your goals, training background, and nutrition preferences.'**
+  String get traineeProfileRegistrationIntro;
+
+  /// No description provided for @trainingGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Goals'**
+  String get trainingGoals;
+
+  /// No description provided for @chooseTrainingGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your training goals'**
+  String get chooseTrainingGoals;
+
+  /// No description provided for @trainingGoalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one training goal.'**
+  String get trainingGoalRequired;
+
+  /// No description provided for @choosePreferredDiets.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose preferred diets'**
+  String get choosePreferredDiets;
+
+  /// No description provided for @preferredDietRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one preferred diet.'**
+  String get preferredDietRequired;
+
   /// No description provided for @metricHeightError.
   ///
   /// In en, this message translates to:

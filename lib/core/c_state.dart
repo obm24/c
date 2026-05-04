@@ -78,7 +78,7 @@ class AppState extends ChangeNotifier {
     'Endurance Training',
     'Mobility Training'
   ];
-  int traineeTrainingExperienceYears = 4;
+  int traineeTrainingExperienceYears = 3;
   List<String> selectedPreferredDiets = [
     'High-protein diet',
     'Mediterranean diet'
@@ -202,8 +202,8 @@ class AppState extends ChangeNotifier {
       'Mobility Training',
       'Rehabilitation'
     ],
-    'trainingExperienceYears': 4,
-    'trainingExperienceLabel': '4 Years',
+    'trainingExperienceYears': 3,
+    'trainingExperienceLabel': '3-5 Years',
     'preferredDiets': ['High-protein diet', 'Mediterranean diet'],
     'diet': 'High Protein / Moderate Carb — approx. 2,800 kcal/day',
     'currentInjuries': [

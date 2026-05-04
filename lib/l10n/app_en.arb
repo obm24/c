@@ -42,6 +42,64 @@
   "height": "Height",
   "physicalTrainingExperience": "Training Experience",
   "trainingExperienceRequired": "Please select your training experience.",
+  "trainingExperienceSelected": "Training experience selected.",
+  "trainingExperienceDialogTitle": "Training Experience",
+  "trainingExperienceDialogIntro": "This is personal physical training experience, not professional coaching.",
+  "experienceLevelZeroYears": "0 Years",
+  "experienceLevelOneToTwoYears": "1\u20132 Years",
+  "experienceLevelThreeToFiveYears": "3\u20135 Years",
+  "experienceLevelSixToNineYears": "6\u20139 Years",
+  "experienceLevelTenPlusYears": "+10 Years",
+  "experienceLevelZeroYearsDescription": "No consistent structured training yet.",
+  "experienceLevelOneToTwoYearsDescription": "Beginner/early foundation, learning consistency, basic form, and basic routines.",
+  "experienceLevelThreeToFiveYearsDescription": "Intermediate, familiar with structured training, progressive overload, and multiple exercise types.",
+  "experienceLevelSixToNineYearsDescription": "Advanced recreational trainee, long-term consistency and strong body awareness.",
+  "experienceLevelTenPlusYearsDescription": "Highly experienced trainee with extensive long-term training exposure.",
+  "selectMeasurementUnitsBeforeHeight": "Select measurement units before entering your height.",
+  "selectMeasurementUnitsBeforeWeight": "Select measurement units before entering your weight.",
+  "heightBoundaryWarning": "Height must be between {min} and {max} {unit}.",
+  "@heightBoundaryWarning": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "weightBoundaryWarning": "Weight must be between {min} and {max} {unit}.",
+  "@weightBoundaryWarning": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldLooksGood": "Looks good.",
+  "selectionLooksGood": "Selection complete.",
+  "registrationRoleRequired": "Please select whether you are registering as a trainee or trainer.",
+  "selectCountry": "Please select your country.",
+  "measurementUnitsRequired": "Please select metric or imperial units.",
+  "dateOfBirthSelected": "Date of birth selected.",
+  "genderSelected": "Gender selected.",
+  "measurementUnitsSelected": "Measurement units selected.",
+  "traineeProfile": "Trainee Profile",
+  "traineeProfileRegistrationIntro": "Help trainers understand your goals, training background, and nutrition preferences.",
+  "trainingGoals": "Training Goals",
+  "chooseTrainingGoals": "Choose your training goals",
+  "trainingGoalRequired": "Please select at least one training goal.",
+  "choosePreferredDiets": "Choose preferred diets",
+  "preferredDietRequired": "Please select at least one preferred diet.",
   "metricHeightError": "Must be between 55–272 cm.",
   "imperialHeightError": "Must be between 1' 9\" and 8' 11\".",
   "weight": "Weight",

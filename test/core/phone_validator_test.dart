@@ -140,7 +140,7 @@ void main() {
       );
     });
 
-    test('Selected country wins over mismatched dial-code selection', () {
+    test('Selected dial-code wins over mismatched country selection', () {
       final result = PhoneValidationService.validateDetailed(
         'assets/images/flags/kr.svg South Korea',
         '1012345678',
@@ -148,10 +148,10 @@ void main() {
       );
 
       expect(result.isValid, isTrue);
-      expect(result.countryIsoCode, 'KR');
-      expect(result.countryDisplayName, 'South Korea');
-      expect(result.callingCode, '+82');
-      expect(result.allowedPrefixes, ['10', '11', '16', '17', '18', '19']);
+      expect(result.countryIsoCode, 'EG');
+      expect(result.countryDisplayName, 'Egypt');
+      expect(result.callingCode, '+20');
+      expect(result.allowedPrefixes, ['10', '11', '12', '15']);
     });
 
     test('Missing country selection falls back to dial-code country', () {

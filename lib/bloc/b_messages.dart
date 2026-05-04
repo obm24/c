@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../models/message_models.dart';
+import '../models/m_messages.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EVENTS

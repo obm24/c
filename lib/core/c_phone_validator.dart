@@ -143,13 +143,13 @@ class PhoneCountryMetadata {
     String? countrySelection, {
     String? dialCodeSelection,
   }) {
-    final countryIso = isoCodeFromSelection(countrySelection);
-    if (countryIso != null && countryPhoneRules.containsKey(countryIso)) {
-      return countryPhoneRules[countryIso];
-    }
     final dialIso = isoCodeFromSelection(dialCodeSelection);
     if (dialIso != null && countryPhoneRules.containsKey(dialIso)) {
       return countryPhoneRules[dialIso];
+    }
+    final countryIso = isoCodeFromSelection(countrySelection);
+    if (countryIso != null && countryPhoneRules.containsKey(countryIso)) {
+      return countryPhoneRules[countryIso];
     }
     return null;
   }
@@ -2196,8 +2196,8 @@ class PhoneValidationService {
     String? countrySelection, {
     String? dialCodeSelection,
   }) {
-    return PhoneCountryMetadata.isoCodeFromSelection(countrySelection) ??
-        PhoneCountryMetadata.isoCodeFromSelection(dialCodeSelection) ??
+    return PhoneCountryMetadata.isoCodeFromSelection(dialCodeSelection) ??
+        PhoneCountryMetadata.isoCodeFromSelection(countrySelection) ??
         '';
   }
 
@@ -2207,9 +2207,9 @@ class PhoneValidationService {
     String? isoCode,
   }) {
     final selection =
-        (countrySelection != null && countrySelection.trim().isNotEmpty)
-            ? countrySelection
-            : dialCodeSelection;
+        (dialCodeSelection != null && dialCodeSelection.trim().isNotEmpty)
+            ? dialCodeSelection
+            : countrySelection;
     final fromSelection = PhoneCountryMetadata.displayNameFromSelection(
       selection,
     );
@@ -2416,10 +2416,10 @@ class PhoneValidationMessageBuilder {
     final max = result.expectedMaxDigits;
     final actualDigits = result.normalizedDigits.length;
     if (min == null || max == null) {
-      return 'Current digits: $actualDigits';
+      return '\nCurrent digits: $actualDigits';
     }
     final target = min == max ? '$max' : '$min-$max';
-    return 'Current digits: $actualDigits/$target';
+    return '\nCurrent digits: $actualDigits/$target';
   }
 
   static String _joinPrefixes(List<String> prefixes) {

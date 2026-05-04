@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../core/c_nutrition_database.dart';
-import '../models/food_nutrition_model.dart';
+import '../models/m_programmes_food_nutrition_model.dart';
 
 // ---------------------------------------------------------------------------
 // Events

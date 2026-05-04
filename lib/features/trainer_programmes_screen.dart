@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../bloc/bloc_programmes.dart';
+import '../bloc/b_programmes.dart';
 import '../core/c_constants.dart';
 import '../core/c_ui_theme.dart';
 import '../core/c_core_utils.dart';
-import '../core/animations/motion.dart';
+import '../core/animations/anim_motion.dart';
 import '../core/c_visual_effects.dart';
-import '../models/programme.dart';
+import '../models/m_programmes.dart';
 
 // ---------------------------------------------------------------------------
 // Root screen

@@ -138,6 +138,121 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please select your training experience.';
 
   @override
+  String get trainingExperienceSelected => 'Training experience selected.';
+
+  @override
+  String get trainingExperienceDialogTitle => 'Training Experience';
+
+  @override
+  String get trainingExperienceDialogIntro =>
+      'This is personal physical training experience, not professional coaching.';
+
+  @override
+  String get experienceLevelZeroYears => '0 Years';
+
+  @override
+  String get experienceLevelOneToTwoYears => '1\u20132 Years';
+
+  @override
+  String get experienceLevelThreeToFiveYears => '3\u20135 Years';
+
+  @override
+  String get experienceLevelSixToNineYears => '6\u20139 Years';
+
+  @override
+  String get experienceLevelTenPlusYears => '+10 Years';
+
+  @override
+  String get experienceLevelZeroYearsDescription =>
+      'No consistent structured training yet.';
+
+  @override
+  String get experienceLevelOneToTwoYearsDescription =>
+      'Beginner/early foundation, learning consistency, basic form, and basic routines.';
+
+  @override
+  String get experienceLevelThreeToFiveYearsDescription =>
+      'Intermediate, familiar with structured training, progressive overload, and multiple exercise types.';
+
+  @override
+  String get experienceLevelSixToNineYearsDescription =>
+      'Advanced recreational trainee, long-term consistency and strong body awareness.';
+
+  @override
+  String get experienceLevelTenPlusYearsDescription =>
+      'Highly experienced trainee with extensive long-term training exposure.';
+
+  @override
+  String get selectMeasurementUnitsBeforeHeight =>
+      'Select measurement units before entering your height.';
+
+  @override
+  String get selectMeasurementUnitsBeforeWeight =>
+      'Select measurement units before entering your weight.';
+
+  @override
+  String heightBoundaryWarning(String min, String max, String unit) {
+    final suffix = unit.trim().isEmpty ? '' : ' $unit';
+    return 'Height must be between $min and $max$suffix.';
+  }
+
+  @override
+  String weightBoundaryWarning(String min, String max, String unit) {
+    final suffix = unit.trim().isEmpty ? '' : ' $unit';
+    return 'Weight must be between $min and $max$suffix.';
+  }
+
+  @override
+  String get fieldLooksGood => 'Looks good.';
+
+  @override
+  String get selectionLooksGood => 'Selection complete.';
+
+  @override
+  String get registrationRoleRequired =>
+      'Please select whether you are registering as a trainee or trainer.';
+
+  @override
+  String get selectCountry => 'Please select your country.';
+
+  @override
+  String get measurementUnitsRequired =>
+      'Please select metric or imperial units.';
+
+  @override
+  String get dateOfBirthSelected => 'Date of birth selected.';
+
+  @override
+  String get genderSelected => 'Gender selected.';
+
+  @override
+  String get measurementUnitsSelected => 'Measurement units selected.';
+
+  @override
+  String get traineeProfile => 'Trainee Profile';
+
+  @override
+  String get traineeProfileRegistrationIntro =>
+      'Help trainers understand your goals, training background, and nutrition preferences.';
+
+  @override
+  String get trainingGoals => 'Training Goals';
+
+  @override
+  String get chooseTrainingGoals => 'Choose your training goals';
+
+  @override
+  String get trainingGoalRequired =>
+      'Please select at least one training goal.';
+
+  @override
+  String get choosePreferredDiets => 'Choose preferred diets';
+
+  @override
+  String get preferredDietRequired =>
+      'Please select at least one preferred diet.';
+
+  @override
   String get metricHeightError => 'Must be between 55–272 cm.';
 
   @override

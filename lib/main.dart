@@ -7,7 +7,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'core/c_ui_theme.dart';
 import 'core/c_state.dart';
 import 'core/c_error_screen.dart';
-import 'core/animations/motion.dart';
+import 'core/animations/anim_motion.dart';
 import 'repositories/exercise_repository.dart';
 
 // Adjust path depending on your code generation/l10n setup
@@ -17,7 +17,7 @@ import 'features/dashboard_trainee_screen.dart' as trainee_dashboard;
 import 'features/dashboard_trainer_screen.dart' as trainer_dashboard;
 import 'features/f_auth_screen.dart';
 import 'features/trainer_programmes_screen.dart';
-import 'models/programme.dart';
+import 'models/m_programmes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

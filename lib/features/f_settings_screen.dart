@@ -7,7 +7,7 @@ import '../core/c_constants.dart';
 import '../core/c_state.dart';
 import '../core/c_core_utils.dart';
 import '../core/c_custom_controls.dart';
-import '../core/animations/motion.dart';
+import '../core/animations/anim_motion.dart';
 import '../core/c_visual_effects.dart';
 import 'f_profile_screen.dart';
 import 'trainer_membership_screen.dart';

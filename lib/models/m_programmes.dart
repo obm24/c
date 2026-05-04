@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'exercise.dart';
+import 'm_programmes_exercise.dart';
 
 enum ProgrammeType { training, diet }
 

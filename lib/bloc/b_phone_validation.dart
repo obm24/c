@@ -71,12 +71,12 @@ class PhoneValidationState extends Equatable {
 
   /// Resolves the effective ISO code from whichever selection is populated.
   String get effectiveIsoCode {
-    final fromCountry =
-        PhoneCountryMetadata.isoCodeFromSelection(selectedCountrySelection);
-    if (fromCountry != null && fromCountry.isNotEmpty) return fromCountry;
     final fromDial =
         PhoneCountryMetadata.isoCodeFromSelection(selectedDialCode);
-    return fromDial ?? '';
+    if (fromDial != null && fromDial.isNotEmpty) return fromDial;
+    final fromCountry =
+        PhoneCountryMetadata.isoCodeFromSelection(selectedCountrySelection);
+    return fromCountry ?? '';
   }
 
   /// Max registration digits for the currently resolved country rule.

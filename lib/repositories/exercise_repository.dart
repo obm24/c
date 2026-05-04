@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import '../models/exercise.dart';
-import '../models/exercise_metadata.dart';
+import '../models/m_programmes_exercise.dart';
+import '../models/m_programmes_exercise_metadata.dart';
 
 class ExerciseRepository {
   static const String defaultAssetPath = 'assets/training-data/exercises.json';

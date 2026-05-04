@@ -749,8 +749,10 @@ class _TraineePublicProfileScreenState
                               '4 Stars',
                               '3 Stars'
                             ],
-                            onChanged: (v) =>
-                                setModalState(() => selectedFilter = v!),
+                            onChanged: (v) {
+                              if (v == null) return;
+                              setModalState(() => selectedFilter = v);
+                            },
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -763,8 +765,10 @@ class _TraineePublicProfileScreenState
                               'Highest',
                               'Lowest'
                             ],
-                            onChanged: (v) =>
-                                setModalState(() => selectedSort = v!),
+                            onChanged: (v) {
+                              if (v == null) return;
+                              setModalState(() => selectedSort = v);
+                            },
                           ),
                         ),
                       ],
@@ -1230,6 +1234,9 @@ class _TraineePublicProfileScreenState
     final name =
         '${trainee['firstName'] ?? ''} ${trainee['lastName'] ?? ''}'.trim();
     final username = (trainee['username'] as String? ?? '').trim();
+    final role = (trainee['role'] as String? ?? 'Trainee').trim();
+    final isTrainer = role.toLowerCase() == 'trainer';
+    final experienceLabel = experienceOption.localizedLabel(context);
 
     return Stack(
       clipBehavior: Clip.none,
@@ -1256,47 +1263,65 @@ class _TraineePublicProfileScreenState
             size: 104,
           ),
         ),
-        Positioned(
-          bottom: -6,
-          right: -22,
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              TraineeTrainingExperienceData.showHelpDialog(context);
-            },
+        if (isTrainer)
+          Positioned(
+            bottom: 2,
+            right: 2,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
               decoration: BoxDecoration(
-                color: experienceOption.color,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppTheme.bg, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.28),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ],
+                shape: BoxShape.circle,
+                color: AppTheme.bg,
+                border: Border.all(color: AppTheme.bg, width: 2),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    experienceOption.label,
-                    style: const TextStyle(
-                      color: AppTheme.bg,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
+              child: const Icon(
+                CupertinoIcons.checkmark_seal_fill,
+                color: AppTheme.brand,
+                size: 24,
+              ),
+            ),
+          )
+        else
+          Positioned(
+            bottom: -6,
+            right: -22,
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                TraineeTrainingExperienceData.showHelpDialog(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                decoration: BoxDecoration(
+                  color: experienceOption.color,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: AppTheme.bg, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.28),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      experienceLabel,
+                      style: const TextStyle(
+                        color: AppTheme.bg,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.help_outline_rounded,
-                      color: AppTheme.bg, size: 12),
-                ],
+                    const SizedBox(width: 4),
+                    const Icon(Icons.help_outline_rounded,
+                        color: AppTheme.bg, size: 12),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

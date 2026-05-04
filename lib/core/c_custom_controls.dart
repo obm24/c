@@ -5,9 +5,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:equatable/equatable.dart';
-import '../models/goal_model.dart';
+import '../models/m_goal_model.dart';
 
-import 'animations/motion.dart';
+import 'animations/anim_motion.dart';
 import 'c_ui_theme.dart';
 import 'c_constants.dart';
 import 'c_core_utils.dart';

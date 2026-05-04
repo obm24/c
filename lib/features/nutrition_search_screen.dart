@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/bloc_nutrition_search.dart';
+import '../bloc/b_programmes_nutrition_search.dart';
 import '../core/c_ui_theme.dart';
 import '../core/c_constants.dart';
 import '../core/c_core_utils.dart';
-import '../models/food_nutrition_model.dart';
+import '../models/m_programmes_food_nutrition_model.dart';
 
 // ============================================================================
 // NutritionSearchScreen — entry point that provides the BLoC

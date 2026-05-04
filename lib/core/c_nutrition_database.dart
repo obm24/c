@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
-import '../models/food_nutrition_model.dart';
+import '../models/m_programmes_food_nutrition_model.dart';
 
 /// Offline nutrition database that parses the FNDDS survey JSON file.
 ///

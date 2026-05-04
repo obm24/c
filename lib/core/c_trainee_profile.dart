@@ -1,118 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/goal_model.dart';
+import '../models/m_goal_model.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/app_localizations_en.dart';
-import 'animations/motion.dart';
+import 'animations/anim_motion.dart';
 import 'c_constants.dart';
 import 'c_ui_theme.dart';
 import 'c_warnings.dart';
 
+enum ExperienceLevel {
+  zeroYears,
+  oneToTwoYears,
+  threeToFiveYears,
+  sixToNineYears,
+  tenPlusYears,
+}
+
 class TrainingExperienceOption {
+  final ExperienceLevel level;
   final int years;
+  final int minYears;
+  final int? maxYears;
   final String label;
   final Color color;
   final String description;
 
   const TrainingExperienceOption({
+    required this.level,
     required this.years,
+    required this.minYears,
+    required this.maxYears,
     required this.label,
     required this.color,
     required this.description,
   });
+
+  bool containsYears(int value) {
+    final clamped = value < 0 ? 0 : value;
+    final ceiling = maxYears;
+    if (ceiling == null) return clamped >= minYears;
+    return clamped >= minYears && clamped <= ceiling;
+  }
+
+  String localizedLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (level) {
+      case ExperienceLevel.zeroYears:
+        return l10n.experienceLevelZeroYears;
+      case ExperienceLevel.oneToTwoYears:
+        return l10n.experienceLevelOneToTwoYears;
+      case ExperienceLevel.threeToFiveYears:
+        return l10n.experienceLevelThreeToFiveYears;
+      case ExperienceLevel.sixToNineYears:
+        return l10n.experienceLevelSixToNineYears;
+      case ExperienceLevel.tenPlusYears:
+        return l10n.experienceLevelTenPlusYears;
+    }
+  }
+
+  String localizedDescription(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (level) {
+      case ExperienceLevel.zeroYears:
+        return l10n.experienceLevelZeroYearsDescription;
+      case ExperienceLevel.oneToTwoYears:
+        return l10n.experienceLevelOneToTwoYearsDescription;
+      case ExperienceLevel.threeToFiveYears:
+        return l10n.experienceLevelThreeToFiveYearsDescription;
+      case ExperienceLevel.sixToNineYears:
+        return l10n.experienceLevelSixToNineYearsDescription;
+      case ExperienceLevel.tenPlusYears:
+        return l10n.experienceLevelTenPlusYearsDescription;
+    }
+  }
 }
 
 class TraineeTrainingExperienceData {
   static const List<TrainingExperienceOption> options = [
     TrainingExperienceOption(
+      level: ExperienceLevel.zeroYears,
       years: 0,
+      minYears: 0,
+      maxYears: 0,
       label: '0 Years',
       color: Color(0xFF94A3B8),
-      description:
-          'Select this if you have not trained consistently yet, are starting structured workouts for the first time, or have only had occasional and inconsistent exposure. This means personal physical training experience, not professional coaching experience.',
+      description: 'No consistent structured training yet.',
     ),
     TrainingExperienceOption(
+      level: ExperienceLevel.oneToTwoYears,
       years: 1,
-      label: '1 Year',
-      color: AppTheme.cardBlue,
-      description:
-          'Select this if you have basic beginner experience and are still learning consistency, common exercises, safe technique, and how your body responds to training. Choose this honestly even if you have tried several workouts before.',
-    ),
-    TrainingExperienceOption(
-      years: 2,
-      label: '2 Years',
+      minYears: 1,
+      maxYears: 2,
+      label: '1-2 Years',
       color: Color(0xFF38BDF8),
       description:
-          'Select this if you have built stronger foundations, understand basic routines, and have some exposure to gradual progression. You may still need guidance with programming, exercise selection, and technique refinement.',
+          'Beginner/early foundation, learning consistency, basic form, and basic routines.',
     ),
     TrainingExperienceOption(
+      level: ExperienceLevel.threeToFiveYears,
       years: 3,
-      label: '3 Years',
-      color: AppTheme.cardGreen,
+      minYears: 3,
+      maxYears: 5,
+      label: '3-5 Years',
+      color: Color(0xFF34D399),
       description:
-          'Select this if you are early-intermediate: you can follow structured plans, recognize common exercise patterns, and understand the basics of warming up, form, effort, and recovery.',
+          'Intermediate, familiar with structured training, progressive overload, and multiple exercise types.',
     ),
     TrainingExperienceOption(
-      years: 4,
-      label: '4 Years',
-      color: Color(0xFF22C55E),
-      description:
-          'Select this if you have consistent intermediate experience, better body awareness, and more confidence with training variety. You likely know which movements suit you, but still benefit from expert planning and feedback.',
-    ),
-    TrainingExperienceOption(
-      years: 5,
-      label: '5 Years',
-      color: AppTheme.cardYellow,
-      description:
-          'Select this if you have solid intermediate experience and understand progressive overload, recovery, and training consistency. This level reflects reliable personal training history, not certification or coaching authority.',
-    ),
-    TrainingExperienceOption(
+      level: ExperienceLevel.sixToNineYears,
       years: 6,
-      label: '6 Years',
+      minYears: 6,
+      maxYears: 9,
+      label: '6-9 Years',
       color: Color(0xFFF59E0B),
       description:
-          'Select this if you are an advanced recreational trainee with long-term consistency and experience managing more structured training phases. You may understand deloads, goal blocks, and fatigue better than most casual trainees.',
+          'Advanced recreational trainee, long-term consistency and strong body awareness.',
     ),
     TrainingExperienceOption(
-      years: 7,
-      label: '7 Years',
-      color: AppTheme.cardPink,
-      description:
-          'Select this if you have strong practical experience, broad exercise familiarity, and better self-monitoring. You likely recognize when technique, load, recovery, or programming needs adjustment.',
-    ),
-    TrainingExperienceOption(
-      years: 8,
-      label: '8 Years',
-      color: AppTheme.cardPurple,
-      description:
-          'Select this if you have extensive training exposure, strong body awareness, and experience with multiple goals or methods. This can include strength, physique, conditioning, sport preparation, or mixed training styles.',
-    ),
-    TrainingExperienceOption(
-      years: 9,
-      label: '9 Years',
-      color: AppTheme.cardIndigo,
-      description:
-          'Select this if you are highly experienced recreationally and likely understand technique, progression, recovery, and consistency very well. Choose this based on sustained personal practice, not occasional years away from training.',
-    ),
-    TrainingExperienceOption(
+      level: ExperienceLevel.tenPlusYears,
       years: 10,
+      minYears: 10,
+      maxYears: null,
       label: '+10 Years',
-      color: AppTheme.cardRed,
+      color: Color(0xFFC084FC),
       description:
-          'Select this if you have a long-term, extensive personal training history across many years. This does not automatically mean you are a certified trainer or coach; it only describes your own physical training background.',
+          'Highly experienced trainee with extensive long-term training exposure.',
     ),
   ];
 
   static int normalizeYears(dynamic value) {
+    if (value is ExperienceLevel) {
+      return optionForLevel(value).years;
+    }
     if (value is int) {
       if (value < 0) return 0;
       if (value > 10) return 10;
       return value;
     }
     if (value is String) {
-      final normalized = value.trim();
+      final normalized = value.trim().toLowerCase();
       if (normalized.contains('+10')) return 10;
+      if (normalized.contains('1-2') || normalized.contains('1\u20132')) {
+        return 1;
+      }
+      if (normalized.contains('3-5') || normalized.contains('3\u20135')) {
+        return 3;
+      }
+      if (normalized.contains('6-9') || normalized.contains('6\u20139')) {
+        return 6;
+      }
       final match = RegExp(r'\d+').firstMatch(normalized);
       if (match != null) {
         return normalizeYears(int.tryParse(match.group(0) ?? '') ?? 0);
@@ -121,10 +158,17 @@ class TraineeTrainingExperienceData {
     return 0;
   }
 
+  static TrainingExperienceOption optionForLevel(ExperienceLevel level) {
+    return options.firstWhere(
+      (option) => option.level == level,
+      orElse: () => options.first,
+    );
+  }
+
   static TrainingExperienceOption optionFor(dynamic value) {
     final years = normalizeYears(value);
     return options.firstWhere(
-      (option) => option.years == years,
+      (option) => option.containsYears(years),
       orElse: () => options.first,
     );
   }
@@ -135,6 +179,7 @@ class TraineeTrainingExperienceData {
     BuildContext context,
     TrainingExperienceOption option,
   ) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return AppMotion.showPremiumDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -144,15 +189,27 @@ class TraineeTrainingExperienceData {
           borderRadius:
               BorderRadius.circular(AppConstants.kDefaultBorderRadius),
         ),
-        title: _DialogTitle(title: option.label),
+        title: _DialogTitle(title: option.localizedLabel(context)),
         content: SingleChildScrollView(
-          child: Text(
-            option.description,
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: AppConstants.kDefaultSubtitleFontSize,
-              height: 1.5,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.trainingExperienceDialogIntro,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: AppConstants.kDefaultSubtitleFontSize,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 14),
+              _ExperienceGuideRow(
+                label: option.localizedLabel(context),
+                color: option.color,
+                text: option.localizedDescription(context),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -161,9 +218,9 @@ class TraineeTrainingExperienceData {
               HapticFeedback.lightImpact();
               Navigator.pop(ctx);
             },
-            child: const Text(
-              'Close',
-              style: TextStyle(
+            child: Text(
+              l10n.close,
+              style: const TextStyle(
                 color: AppTheme.brand,
                 fontWeight: FontWeight.bold,
               ),
@@ -175,6 +232,7 @@ class TraineeTrainingExperienceData {
   }
 
   static Future<void> showHelpDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return AppMotion.showPremiumDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -184,44 +242,26 @@ class TraineeTrainingExperienceData {
           borderRadius:
               BorderRadius.circular(AppConstants.kDefaultBorderRadius),
         ),
-        title: const _DialogTitle(title: 'Training Experience'),
+        title: _DialogTitle(title: l10n.trainingExperienceDialogTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Choose the level that best reflects your own consistent physical training history. This is about personal training experience, not professional coaching experience.',
-                style: TextStyle(
+              Text(
+                l10n.trainingExperienceDialogIntro,
+                style: const TextStyle(
                   color: AppTheme.textPrimary,
                   fontSize: AppConstants.kDefaultSubtitleFontSize,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'Base your choice on consistency, exposure to structured workouts, technique awareness, progression, recovery habits, and your ability to train safely without constant supervision.',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 13,
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 18),
               ...options.map(
                 (option) => _ExperienceGuideRow(
-                  label: option.label,
+                  label: option.localizedLabel(context),
                   color: option.color,
-                  text: option.description,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Selecting honestly helps trainers match the right intensity, cues, progressions, and safety checks to your real background.',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 13,
-                  height: 1.5,
+                  text: option.localizedDescription(context),
                 ),
               ),
             ],
@@ -233,9 +273,9 @@ class TraineeTrainingExperienceData {
               HapticFeedback.lightImpact();
               Navigator.pop(ctx);
             },
-            child: const Text(
-              'Close',
-              style: TextStyle(
+            child: Text(
+              l10n.close,
+              style: const TextStyle(
                 color: AppTheme.brand,
                 fontWeight: FontWeight.bold,
               ),
@@ -278,6 +318,7 @@ class _TrainingExperienceSelectorState
     final selectedOption = widget.selectedYears == null
         ? null
         : TraineeTrainingExperienceData.optionFor(widget.selectedYears);
+    final selectedStorageYears = selectedOption?.years;
     final title = widget.title == 'Physical Training Experience' ||
             widget.title == 'Training Experience'
         ? l10n.physicalTrainingExperience
@@ -330,129 +371,135 @@ class _TrainingExperienceSelectorState
             constraints: const BoxConstraints(
               minHeight: AppConstants.kDefaultButtonHeightLarge,
             ),
-            decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.circular(AppConstants.kDefaultBorderRadius),
-              border: Border.all(color: AppTheme.textSecondary, width: 1.5),
-            ),
-            child: Column(
-              children: [
-                InkWell(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.kDefaultBorderRadius),
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _expanded = !_expanded);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 14,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            selectedOption?.label ??
-                                l10n.trainingExperienceRequired,
-                            style: TextStyle(
-                              color: selectedOption == null
-                                  ? AppTheme.textSecondary
-                                  : AppTheme.textPrimary,
-                              fontSize: AppConstants.kDefaultSubtitleFontSize,
-                              fontWeight: selectedOption == null
-                                  ? FontWeight.normal
-                                  : FontWeight.bold,
+            child: AnimatedContainer(
+              duration: AppMotion.duration(context, AppDurations.standard),
+              curve: AppCurves.entrance,
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(AppConstants.kDefaultBorderRadius),
+                border: Border.all(
+                  color: selectedOption == null
+                      ? AppTheme.textSecondary
+                      : AppTheme.cardGreen,
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(
+                        AppConstants.kDefaultBorderRadius),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _expanded = !_expanded);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              selectedOption?.localizedLabel(context) ??
+                                  l10n.trainingExperienceRequired,
+                              style: TextStyle(
+                                color: selectedOption == null
+                                    ? AppTheme.textSecondary
+                                    : AppTheme.textPrimary,
+                                fontSize: AppConstants.kDefaultSubtitleFontSize,
+                                fontWeight: selectedOption == null
+                                    ? FontWeight.normal
+                                    : FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        AnimatedRotation(
-                          turns: _expanded ? 0.5 : 0,
-                          duration: const Duration(milliseconds: 180),
-                          child: const Icon(
-                            Icons.arrow_drop_down,
-                            color: AppTheme.textSecondary,
+                          if (selectedOption != null) ...[
+                            const Icon(
+                              Icons.check_circle,
+                              color: AppTheme.cardGreen,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          AnimatedRotation(
+                            turns: _expanded ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 180),
+                            child: const Icon(
+                              Icons.arrow_drop_down,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  AnimatedCrossFade(
+                    firstChild: const SizedBox.shrink(),
+                    secondChild: Column(
+                      children: [
+                        const Divider(color: AppTheme.divider, height: 1),
+                        RadioGroup<int>(
+                          groupValue: selectedStorageYears,
+                          onChanged: (years) {
+                            if (years == null) return;
+                            HapticFeedback.selectionClick();
+                            widget.onSelected(years);
+                            setState(() => _expanded = false);
+                          },
+                          child: Column(
+                            children: TraineeTrainingExperienceData.options
+                                .map((option) {
+                              final selected =
+                                  option.years == selectedStorageYears;
+                              return RadioListTile<int>(
+                                value: option.years,
+                                activeColor: option.color,
+                                dense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 0,
+                                ),
+                                title: Text(
+                                  option.localizedLabel(context),
+                                  style: TextStyle(
+                                    color: selected
+                                        ? option.color
+                                        : AppTheme.textSecondary,
+                                    fontSize:
+                                        AppConstants.kDefaultSubtitleFontSize,
+                                    fontWeight: selected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
                       ],
                     ),
+                    crossFadeState: _expanded
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                    duration: const Duration(milliseconds: 180),
+                    sizeCurve: Curves.easeOutCubic,
                   ),
-                ),
-                AnimatedCrossFade(
-                  firstChild: const SizedBox.shrink(),
-                  secondChild: Column(
-                    children: [
-                      const Divider(color: AppTheme.divider, height: 1),
-                      RadioGroup<int>(
-                        groupValue: widget.selectedYears,
-                        onChanged: (years) {
-                          if (years == null) return;
-                          HapticFeedback.selectionClick();
-                          widget.onSelected(years);
-                          setState(() => _expanded = false);
-                        },
-                        child: Column(
-                          children: TraineeTrainingExperienceData.options
-                              .map((option) {
-                            return RadioListTile<int>(
-                              value: option.years,
-                              activeColor: option.color,
-                              dense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 0,
-                              ),
-                              secondary: IconButton(
-                                visualDensity: VisualDensity.compact,
-                                constraints: const BoxConstraints(
-                                  minHeight: 36,
-                                  minWidth: 36,
-                                ),
-                                splashRadius: 18,
-                                icon: Icon(
-                                  Icons.help_outline_rounded,
-                                  color: option.color,
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  TraineeTrainingExperienceData
-                                      .showOptionHelpDialog(context, option);
-                                },
-                              ),
-                              title: Text(
-                                option.label,
-                                style: TextStyle(
-                                  color: option.years == widget.selectedYears
-                                      ? option.color
-                                      : AppTheme.textSecondary,
-                                  fontSize:
-                                      AppConstants.kDefaultSubtitleFontSize,
-                                  fontWeight:
-                                      option.years == widget.selectedYears
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  crossFadeState: _expanded
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 180),
-                  sizeCurve: Curves.easeOutCubic,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          if (widget.showRequiredWarning)
+          if (selectedOption == null && widget.showRequiredWarning)
             StandardFormWarningBanner(
               message: warningText,
               isValid: false,
+              margin: const EdgeInsets.only(top: 10),
+            )
+          else if (selectedOption != null)
+            StandardFormWarningBanner(
+              message: l10n.trainingExperienceSelected,
+              isValid: true,
               margin: const EdgeInsets.only(top: 10),
             ),
         ],

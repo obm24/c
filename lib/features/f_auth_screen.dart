@@ -9,13 +9,13 @@ import '../core/c_constants.dart';
 import '../core/c_core_utils.dart';
 import '../core/c_custom_controls.dart';
 import '../core/c_state.dart';
-import '../core/animations/motion.dart';
+import '../core/animations/anim_motion.dart';
 import '../core/c_phone_validator.dart';
 import '../core/c_warnings.dart';
 import '../core/c_trainee_profile.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/bloc_phone_validation.dart';
+import '../bloc/b_phone_validation.dart';
 
 // =============================================================================
 // LOGIN SCREEN
@@ -317,19 +317,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     _weightCtrl.addListener(() => setState(() {}));
   }
 
-  /// Returns the dial-code entry from [_sortedCodes] whose ISO code matches
-  /// the ISO code of [selection], or null if no match is found.
-  String? _countryCodeForSelection(String? selection) {
-    final isoCode = PhoneCountryMetadata.isoCodeFromSelection(selection);
-    if (isoCode == null) return null;
-    for (final code in _sortedCodes) {
-      if (PhoneCountryMetadata.isoCodeFromSelection(code) == isoCode) {
-        return code;
-      }
-    }
-    return null;
-  }
-
   @override
   void dispose() {
     for (final ctrl in [
@@ -364,7 +351,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool get isConfPassValid =>
       _confPassCtrl.text.isNotEmpty && _confPassCtrl.text == _passCtrl.text;
   bool get isPhoneValid => PhoneValidationService.validateDetailed(
-        _selectedCountry ?? '',
+        '',
         _phoneCtrl.text,
         dialCodeSelection: _selectedCountryCode,
       ).isValid;
@@ -388,42 +375,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   String get _heightWarningText {
     if (_isMetric == null) {
-      return 'Select measurement units before entering your height.';
+      return context.l10n.selectMeasurementUnitsBeforeHeight;
     }
-    final text = _heightCtrl.text.trim();
     if (_isMetric == true) {
-      if (text.isEmpty) return 'Height is required. Enter your height in centimeters.';
-      final h = double.tryParse(text);
-      if (h == null) return 'Height must be a number in centimeters.';
-      if (h < 100 || h > 250) return 'Height must be between 100 and 250 cm.';
-      return 'Height looks realistic for metric registration.';
+      return context.l10n.heightBoundaryWarning('100', '250', 'cm');
     }
-    if (text.isEmpty) return 'Height is required. Enter feet and inches.';
-    final parts = _imperialHeightParts();
-    if (parts == null) return 'Enter height as feet and inches, for example 5\' 9".';
-    if (parts.$2 < 0 || parts.$2 > 11) return 'Inches must be between 0 and 11.';
-    final total = (parts.$1 * 12) + parts.$2;
-    if (total < 39 || total > 98) return 'Height must be between 3 ft 3 in and 8 ft 2 in.';
-    return 'Height looks realistic for imperial registration.';
+    return context.l10n.heightBoundaryWarning(
+      '3 ft 3 in',
+      '8 ft 2 in',
+      '',
+    );
   }
 
   String get _weightWarningText {
     if (_isMetric == null) {
-      return 'Select measurement units before entering your weight.';
+      return context.l10n.selectMeasurementUnitsBeforeWeight;
     }
-    final text = _weightCtrl.text.trim();
     if (_isMetric == true) {
-      if (text.isEmpty) return 'Weight is required. Enter your weight in kilograms.';
-      final w = double.tryParse(text);
-      if (w == null) return 'Weight must be a number in kilograms.';
-      if (w < 30 || w > 300) return 'Weight must be between 30 and 300 kg.';
-      return 'Weight looks realistic for metric registration.';
+      return context.l10n.weightBoundaryWarning('30', '300', 'kg');
     }
-    if (text.isEmpty) return 'Weight is required. Enter your weight in pounds.';
-    final w = double.tryParse(text);
-    if (w == null) return 'Weight must be a number in pounds.';
-    if (w < 66 || w > 660) return 'Weight must be between 66 and 660 lb.';
-    return 'Weight looks realistic for imperial registration.';
+    return context.l10n.weightBoundaryWarning('66', '660', 'lb');
   }
 
   bool get isCredentialsValid {
@@ -568,7 +539,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final results = await AppMotion.showPremiumDialog<List<String>>(
       context: context,
       builder: (ctx) => GroupedMultiSelectDialog(
-        title: 'Training Goals',
+        title: context.l10n.trainingGoals,
         categories: cats,
         initialSelections: _traineeGoals,
       ),
@@ -580,7 +551,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final results = await AppMotion.showPremiumDialog<List<String>>(
       context: context,
       builder: (ctx) => GroupedMultiSelectDialog(
-        title: 'Preferred Diet',
+        title: context.l10n.preferredDiet,
         categories: TraineeDietData.categories,
         initialSelections: _preferredDiets,
       ),
@@ -589,8 +560,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   static const List<String> _placeTypes = [
-    'Gym', 'Fitness Club', 'Studio', 'Outdoor',
-    'Pool', 'Rehabilitation Center', 'Sports Complex', 'Other',
+    'Gym',
+    'Fitness Club',
+    'Studio',
+    'Outdoor',
+    'Pool',
+    'Rehabilitation Center',
+    'Sports Complex',
+    'Other',
   ];
 
   void _openPlaceSheet({Map<String, dynamic>? existing, int? editIdx}) {
@@ -598,6 +575,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final addrCtrl = TextEditingController(text: existing?['address'] ?? '');
     String selType = existing?['type'] ?? _placeTypes.first;
     String? selCity = existing?['city'];
+    final countrySelection = _selectedCountry;
     final adminInfo = CountryAdminInfo.resolve(_selectedCountry);
     final hasRegions = adminInfo.regions.isNotEmpty;
 
@@ -626,13 +604,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
               enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                      AppConstants.kDefaultBorderRadius),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.kDefaultBorderRadius),
                   borderSide: const BorderSide(
                       color: AppTheme.textSecondary, width: 1.5)),
               focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                      AppConstants.kDefaultBorderRadius),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.kDefaultBorderRadius),
                   borderSide:
                       const BorderSide(color: AppTheme.brand, width: 2)),
             );
@@ -686,8 +664,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             setM(() => selType = t);
                           },
                           child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 14),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                                 color:
@@ -719,20 +696,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       decoration: dec(context.l10n.facilityName)),
                   const SizedBox(height: 15),
                   TextFormField(
-                      initialValue: _selectedCountry?.textWithoutFlag,
+                      initialValue: countrySelection?.textWithoutFlag,
                       readOnly: true,
                       style: const TextStyle(
                           color: AppTheme.textPrimary,
                           fontSize: AppConstants.kDefaultSubtitleFontSize),
-                      decoration: dec('Country of Employment',
+                      decoration: dec(context.l10n.countryOfEmployment,
                               suffixIcon: const Padding(
                                   padding: EdgeInsets.only(right: 12),
                                   child: Icon(Icons.public,
-                                      color: AppTheme.textSecondary,
-                                      size: 20)))
+                                      color: AppTheme.textSecondary, size: 20)))
                           .copyWith(
-                        prefixIcon: _selectedCountry != null &&
-                                _selectedCountry!.flagSvgPath.isNotEmpty
+                        prefixIcon: countrySelection != null &&
+                                countrySelection.flagSvgPath.isNotEmpty
                             ? Padding(
                                 padding: const EdgeInsets.all(14),
                                 child: Container(
@@ -743,7 +719,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         color: Colors.black54, width: 0.5),
                                   ),
                                   child: SvgPicture.asset(
-                                    _selectedCountry!.flagSvgPath,
+                                    countrySelection.flagSvgPath,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -858,10 +834,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       FilteringTextInputFormatter.deny(RegExp(r'\n')),
       if (formatters != null) ...formatters,
     ];
+    final Color borderColor = readOnly
+        ? Colors.white12
+        : (isValid ? AppTheme.cardGreen : AppTheme.textSecondary);
+    final Color focusedBorderColor =
+        isValid ? AppTheme.cardGreen : AppTheme.brand;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child:
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         TextFormField(
           controller: controller,
           obscureText: obscure,
@@ -870,19 +850,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           textInputAction: TextInputAction.next,
           readOnly: readOnly,
           style: TextStyle(
-              color:
-                  readOnly ? AppTheme.textSecondary : AppTheme.textPrimary,
+              color: readOnly ? AppTheme.textSecondary : AppTheme.textPrimary,
               fontSize: AppConstants.kDefaultSubtitleFontSize),
           decoration: InputDecoration(
             labelText: label,
             suffixText: suffixText,
+            suffixIcon: isValid
+                ? const Icon(
+                    Icons.check_circle,
+                    color: AppTheme.cardGreen,
+                    size: 18,
+                  )
+                : null,
             labelStyle: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: AppConstants.kDefaultSubtitleFontSize),
             floatingLabelStyle: WidgetStateTextStyle.resolveWith((s) =>
                 TextStyle(
                     color: s.contains(WidgetState.focused)
-                        ? AppTheme.brand
+                        ? focusedBorderColor
                         : AppTheme.textPrimary,
                     fontSize: AppConstants.kDefaultFormTitleFontSize)),
             suffixStyle: const TextStyle(
@@ -891,15 +877,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                    AppConstants.kDefaultBorderRadius),
-                borderSide: const BorderSide(
-                    color: AppTheme.textSecondary, width: 1.5)),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.kDefaultBorderRadius),
+                borderSide: BorderSide(color: borderColor, width: 1.5)),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                    AppConstants.kDefaultBorderRadius),
-                borderSide:
-                    const BorderSide(color: AppTheme.brand, width: 2)),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.kDefaultBorderRadius),
+                borderSide: BorderSide(color: focusedBorderColor, width: 2)),
           ),
         ),
         _mandatoryWarning(ruleText, isValid: isValid),
@@ -923,25 +907,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           PhoneValidationMessageBuilder.buildMessage(result, compact: true),
       isValid: result.isValid,
       margin: const EdgeInsets.only(top: 8),
-      trailing: result.hasLongPrefixList && !result.isValid
-          ? IconButton(
-              onPressed: () => _showPhonePrefixDetails(result),
-              splashRadius: 18,
-              icon: const Icon(
-                Icons.help_outline_rounded,
-                size: 16,
-                color: AppTheme.textSecondary,
-              ),
-            )
-          : null,
     );
   }
 
   bool get _hasRegistrationProgress {
     final ctrls = [
-      _usernameCtrl, _fNameCtrl, _lNameCtrl, _emailCtrl,
-      _passCtrl, _confPassCtrl, _phoneCtrl, _heightCtrl,
-      _weightCtrl, _idNumberCtrl,
+      _usernameCtrl,
+      _fNameCtrl,
+      _lNameCtrl,
+      _emailCtrl,
+      _passCtrl,
+      _confPassCtrl,
+      _phoneCtrl,
+      _heightCtrl,
+      _weightCtrl,
+      _idNumberCtrl,
     ];
     if (ctrls.any((c) => c.text.trim().isNotEmpty)) return true;
     return _isTrainer != null ||
@@ -981,8 +961,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               child: Text(
                 context.l10n.cancelRegistrationTitle,
                 style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.bold),
+                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
               ),
             ),
             const Divider(color: AppTheme.divider, height: 1),
@@ -999,8 +978,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(context.l10n.discardProgress,
-                style:
-                    const TextStyle(color: AppTheme.textSecondary)),
+                style: const TextStyle(color: AppTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -1018,49 +996,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final ok = await _confirmCancelRegistration();
     if (!mounted || !ok) return;
     Navigator.pop(context);
-  }
-
-  void _showPhonePrefixDetails(PhoneValidationResult result) {
-    AppMotion.showPremiumBottomSheet(
-      context: context,
-      backgroundColor: AppTheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 18, 24, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: AppTheme.divider,
-                      borderRadius: BorderRadius.circular(10))),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              '${result.countryDisplayName} Mobile Prefixes',
-              style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              PhoneValidationMessageBuilder.buildPrefixDetails(result),
-              style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 13,
-                  height: 1.5),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _employmentRadio({
@@ -1099,9 +1034,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected
-                      ? AppTheme.brand
-                      : AppTheme.textSecondary,
+                  color: isSelected ? AppTheme.brand : AppTheme.textSecondary,
                   width: isSelected ? 6 : 2,
                 ),
               ),
@@ -1113,11 +1046,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   Text(title,
                       style: TextStyle(
                           color: AppTheme.textPrimary,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w600,
-                          fontSize:
-                              AppConstants.kDefaultSubtitleFontSize)),
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w600,
+                          fontSize: AppConstants.kDefaultSubtitleFontSize)),
                   const SizedBox(height: 4),
                   Text(description,
                       style: const TextStyle(
@@ -1143,8 +1074,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child:
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(label,
             style: const TextStyle(
                 color: AppTheme.textPrimary,
@@ -1161,18 +1091,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             padding: const EdgeInsets.all(15),
             constraints: const BoxConstraints(minHeight: 60),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                    AppConstants.kDefaultBorderRadius),
-                border: Border.all(
-                    color: AppTheme.textSecondary, width: 1.5)),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.kDefaultBorderRadius),
+                border: Border.all(color: AppTheme.textSecondary, width: 1.5)),
             child: Row(children: [
               Expanded(
                   child: selectedItems.isEmpty
                       ? Text(emptyText,
                           style: const TextStyle(
                               color: AppTheme.textSecondary,
-                              fontSize: AppConstants
-                                  .kDefaultSubtitleFontSize))
+                              fontSize: AppConstants.kDefaultSubtitleFontSize))
                       : Wrap(
                           spacing: 6,
                           runSpacing: 6,
@@ -1183,8 +1111,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     decoration: BoxDecoration(
                                         color: chipColor,
                                         borderRadius: BorderRadius.circular(
-                                            AppConstants
-                                                .kDefaultBorderRadius)),
+                                            AppConstants.kDefaultBorderRadius)),
                                     child: Text(item,
                                         style: const TextStyle(
                                             color: AppTheme.bg,
@@ -1192,13 +1119,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                             fontSize: 13)),
                                   ))
                               .toList())),
-              const Icon(Icons.arrow_drop_down,
-                  color: AppTheme.textSecondary),
+              const Icon(Icons.arrow_drop_down, color: AppTheme.textSecondary),
             ]),
           ),
         ),
         if (selectedItems.isEmpty && warningText != null)
-          _mandatoryWarning(warningText),
+          _mandatoryWarning(warningText)
+        else if (selectedItems.isNotEmpty)
+          _mandatoryWarning(context.l10n.selectionLooksGood, isValid: true),
       ]),
     );
   }
@@ -1218,8 +1146,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             'Code',
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
-          icon: const Icon(Icons.arrow_drop_down,
-              color: AppTheme.textSecondary),
+          icon:
+              const Icon(Icons.arrow_drop_down, color: AppTheme.textSecondary),
           selectedItemBuilder: (_) => _sortedCodes.map((c) {
             final parts = c.split(' ');
             final svgPath = parts[0];
@@ -1249,8 +1177,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Text(dialCode,
                     style: const TextStyle(
                         color: AppTheme.textPrimary,
-                        fontSize:
-                            AppConstants.kDefaultSubtitleFontSize)),
+                        fontSize: AppConstants.kDefaultSubtitleFontSize)),
               ]),
             );
           }).toList(),
@@ -1260,7 +1187,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             if (v == null) return;
             setState(() => _selectedCountryCode = v);
             bloc.add(CountrySelected(
-              _selectedCountry ?? '',
+              '',
               dialCodeSelection: v,
             ));
           },
@@ -1278,7 +1205,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       // ✅ FIX: seed with both selections so the initial state is correct.
       create: (_) => PhoneValidationBloc()
         ..add(CountrySelected(
-          _selectedCountry ?? '',
+          '',
           dialCodeSelection: _selectedCountryCode,
         )),
       child: PopScope(
@@ -1293,11 +1220,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             backgroundColor: AppTheme.bg,
             appBar: AppBar(
                 elevation: 0,
-                iconTheme:
-                    const IconThemeData(color: AppTheme.textPrimary),
+                iconTheme: const IconThemeData(color: AppTheme.textPrimary),
                 title: Text(context.l10n.register,
-                    style:
-                        const TextStyle(color: AppTheme.brand))),
+                    style: const TextStyle(color: AppTheme.brand))),
             body: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(32),
@@ -1313,21 +1238,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             onSelected: (isLeft) =>
                                 setState(() => _isTrainer = !isLeft))),
                     if (_isTrainer == null)
+                      _mandatoryWarning(context.l10n.registrationRoleRequired)
+                    else
                       _mandatoryWarning(
-                          'Please select whether you are registering as a trainee or trainer.'),
+                        context.l10n.selectionLooksGood,
+                        isValid: true,
+                      ),
                     const SizedBox(height: 30),
 
                     Text(context.l10n.accountInfo,
                         style: const TextStyle(
                             color: AppTheme.brand,
-                            fontSize:
-                                AppConstants.kDefaultTitleFontSize,
+                            fontSize: AppConstants.kDefaultTitleFontSize,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
 
                     _field(context.l10n.username,
-                        ruleText:
-                            context.l10n.invalidUsernameError,
+                        ruleText: context.l10n.invalidUsernameError,
                         isValid: isUsernameValid,
                         controller: _usernameCtrl,
                         formatters: [
@@ -1345,8 +1272,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         controller: _passCtrl,
                         obscure: true),
                     _field(context.l10n.confirmPassword,
-                        ruleText:
-                            context.l10n.passwordMismatchError,
+                        ruleText: context.l10n.passwordMismatchError,
                         isValid: isConfPassValid,
                         controller: _confPassCtrl,
                         obscure: true),
@@ -1355,8 +1281,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Text(context.l10n.personalInfo,
                         style: const TextStyle(
                             color: AppTheme.brand,
-                            fontSize:
-                                AppConstants.kDefaultTitleFontSize,
+                            fontSize: AppConstants.kDefaultTitleFontSize,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
 
@@ -1382,89 +1307,70 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       key: _countryFieldKey,
                       padding: const EdgeInsets.only(bottom: 20),
                       child: Builder(builder: (context) {
-                        final bloc =
-                            context.read<PhoneValidationBloc>();
+                        final bloc = context.read<PhoneValidationBloc>();
                         return Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               DropdownButtonFormField<String>(
                                 decoration: InputDecoration(
                                   labelText: _isTrainer == true
-                                      ? 'Country of Employment'
+                                      ? context.l10n.countryOfEmployment
                                       : _isTrainer == false
-                                          ? 'Country of Residence'
+                                          ? context.l10n.countryOfResidence
                                           : 'Country',
                                   labelStyle: const TextStyle(
                                       color: AppTheme.textPrimary,
                                       fontSize: AppConstants
                                           .kDefaultSubtitleFontSize),
-                                  floatingLabelStyle:
-                                      const TextStyle(
-                                          color: AppTheme.brand,
-                                          fontSize: AppConstants
-                                              .kDefaultFormTitleFontSize),
+                                  floatingLabelStyle: const TextStyle(
+                                      color: AppTheme.brand,
+                                      fontSize: AppConstants
+                                          .kDefaultFormTitleFontSize),
                                   enabledBorder: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              AppConstants
-                                                  .kDefaultBorderRadius),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.kDefaultBorderRadius),
                                       borderSide: const BorderSide(
                                           color: AppTheme.textSecondary,
                                           width: 1.5)),
                                   focusedBorder: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              AppConstants
-                                                  .kDefaultBorderRadius),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.kDefaultBorderRadius),
                                       borderSide: const BorderSide(
-                                          color: AppTheme.brand,
-                                          width: 2)),
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 15,
-                                          vertical: 18),
+                                          color: AppTheme.brand, width: 2)),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 18),
                                 ),
                                 dropdownColor: AppTheme.surface,
                                 icon: const Icon(Icons.arrow_drop_down,
                                     color: AppTheme.textSecondary),
                                 style: const TextStyle(
                                     color: AppTheme.textPrimary,
-                                    fontSize: AppConstants
-                                        .kDefaultSubtitleFontSize),
+                                    fontSize:
+                                        AppConstants.kDefaultSubtitleFontSize),
                                 initialValue: _selectedCountry,
                                 isExpanded: true,
                                 isDense: true,
                                 itemHeight: null,
-                                selectedItemBuilder: (_) =>
-                                    AppConstants.kCountriesOnly
-                                        .map((c) => CountryFlagWidget(
-                                            textData: c))
-                                        .toList(),
+                                selectedItemBuilder: (_) => AppConstants
+                                    .kCountriesOnly
+                                    .map((c) => CountryFlagWidget(textData: c))
+                                    .toList(),
                                 items: AppConstants.kCountriesOnly
                                     .map((c) => DropdownMenuItem(
                                         value: c,
-                                        child: CountryFlagWidget(
-                                            textData: c)))
+                                        child: CountryFlagWidget(textData: c)))
                                     .toList(),
                                 // ✅ FIX: pass the resolved dial code
                                 //         together with the country so
                                 //         both arrive in one BLoC event.
                                 onChanged: (v) {
-                                  final matchingCode =
-                                      _countryCodeForSelection(v);
                                   setState(() {
                                     _selectedCountry = v;
                                     _selectedRegion = null;
-                                    if (matchingCode != null) {
-                                      _selectedCountryCode =
-                                          matchingCode;
-                                    }
                                   });
                                   bloc.add(CountrySelected(
-                                    v ?? '',
-                                    dialCodeSelection: matchingCode ??
-                                        _selectedCountryCode,
+                                    '',
+                                    dialCodeSelection: _selectedCountryCode,
                                   ));
                                 },
                               ),
@@ -1472,9 +1378,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 _mandatoryWarning(_isTrainer == true
                                     ? context.l10n.selectCountryEmployment
                                     : _isTrainer == false
-                                        ? context
-                                            .l10n.selectCountryResidence
-                                        : 'Please select your country.'),
+                                        ? context.l10n.selectCountryResidence
+                                        : context.l10n.selectCountry)
+                              else
+                                _mandatoryWarning(
+                                  context.l10n.selectionLooksGood,
+                                  isValid: true,
+                                ),
                             ]);
                       }),
                     ),
@@ -1483,26 +1393,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Builder(builder: (context) {
                       final adminInfo =
                           CountryAdminInfo.resolve(_selectedCountry);
-                      final bool hasCountry =
-                          _selectedCountry != null;
-                      final bool hasRegions =
-                          adminInfo.regions.isNotEmpty;
-                      final String subdivLabel =
-                          hasCountry && hasRegions
-                              ? adminInfo.label
-                              : 'Subdivision';
+                      final bool hasCountry = _selectedCountry != null;
+                      final bool hasRegions = adminInfo.regions.isNotEmpty;
+                      final String subdivLabel = hasCountry && hasRegions
+                          ? adminInfo.label
+                          : 'Subdivision';
                       return Padding(
                           key: _subdivisionFieldKey,
                           padding: const EdgeInsets.only(bottom: 20),
                           child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 IgnorePointer(
-                                  ignoring:
-                                      !hasCountry || !hasRegions,
-                                  child:
-                                      DropdownButtonFormField<String>(
+                                  ignoring: !hasCountry || !hasRegions,
+                                  child: DropdownButtonFormField<String>(
                                     decoration: InputDecoration(
                                       labelText: subdivLabel,
                                       labelStyle: TextStyle(
@@ -1511,34 +1415,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                               : AppTheme.textSecondary,
                                           fontSize: AppConstants
                                               .kDefaultSubtitleFontSize),
-                                      floatingLabelStyle:
-                                          const TextStyle(
-                                              color: AppTheme.brand,
-                                              fontSize: AppConstants
-                                                  .kDefaultFormTitleFontSize),
+                                      floatingLabelStyle: const TextStyle(
+                                          color: AppTheme.brand,
+                                          fontSize: AppConstants
+                                              .kDefaultFormTitleFontSize),
                                       enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(
-                                                  AppConstants
-                                                      .kDefaultBorderRadius),
+                                          borderRadius: BorderRadius.circular(
+                                              AppConstants
+                                                  .kDefaultBorderRadius),
                                           borderSide: BorderSide(
                                               color: hasCountry
-                                                  ? AppTheme
-                                                      .textSecondary
+                                                  ? AppTheme.textSecondary
                                                   : Colors.white12,
                                               width: 1.5)),
                                       focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(
-                                                  AppConstants
-                                                      .kDefaultBorderRadius),
+                                          borderRadius: BorderRadius.circular(
+                                              AppConstants
+                                                  .kDefaultBorderRadius),
                                           borderSide: const BorderSide(
-                                              color: AppTheme.brand,
-                                              width: 2)),
+                                              color: AppTheme.brand, width: 2)),
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                              horizontal: 15,
-                                              vertical: 18),
+                                              horizontal: 15, vertical: 18),
                                     ),
                                     dropdownColor: AppTheme.surface,
                                     icon: Icon(Icons.arrow_drop_down,
@@ -1551,9 +1449,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                             : AppTheme.textSecondary,
                                         fontSize: AppConstants
                                             .kDefaultSubtitleFontSize),
-                                    initialValue: hasRegions
-                                        ? _selectedRegion
-                                        : null,
+                                    initialValue:
+                                        hasRegions ? _selectedRegion : null,
                                     hint: Text(
                                       !hasCountry
                                           ? 'Select country first'
@@ -1572,26 +1469,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     itemHeight: null,
                                     items: hasRegions
                                         ? adminInfo.regions
-                                            .map((r) =>
-                                                DropdownMenuItem(
-                                                    value: r,
-                                                    child: Text(r)))
+                                            .map((r) => DropdownMenuItem(
+                                                value: r, child: Text(r)))
                                             .toList()
                                         : [],
-                                    onChanged:
-                                        hasCountry && hasRegions
-                                            ? (v) => setState(
-                                                () => _selectedRegion =
-                                                    v)
-                                            : null,
+                                    onChanged: hasCountry && hasRegions
+                                        ? (v) =>
+                                            setState(() => _selectedRegion = v)
+                                        : null,
                                   ),
                                 ),
                                 if (hasCountry &&
                                     hasRegions &&
                                     _selectedRegion == null)
                                   _mandatoryWarning(context.l10n
-                                      .pleaseSelectField(adminInfo.label
-                                          .toLowerCase())),
+                                      .pleaseSelectField(
+                                          adminInfo.label.toLowerCase()))
+                                else if (hasCountry && hasRegions)
+                                  _mandatoryWarning(
+                                    context.l10n.selectionLooksGood,
+                                    isValid: true,
+                                  ),
                               ]));
                     }),
 
@@ -1599,23 +1497,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 20),
                       child: Builder(builder: (context) {
-                        final bloc =
-                            context.read<PhoneValidationBloc>();
+                        final bloc = context.read<PhoneValidationBloc>();
                         return BlocBuilder<PhoneValidationBloc,
                             PhoneValidationState>(
                           builder: (context, state) {
+                            final phoneValid = state.validationResult.isValid;
                             return Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
                                   controller: _phoneCtrl,
                                   keyboardType: TextInputType.number,
-                                  textInputAction:
-                                      TextInputAction.next,
+                                  textInputAction: TextInputAction.next,
                                   inputFormatters: [
-                                    FilteringTextInputFormatter
-                                        .digitsOnly,
+                                    FilteringTextInputFormatter.digitsOnly,
                                     // ✅ FIX: max length is derived live
                                     //         from the BLoC's resolved rule.
                                     LengthLimitingTextInputFormatter(
@@ -1623,60 +1518,56 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     ),
                                   ],
                                   // ✅ FIX: notify BLoC on every keystroke.
-                                  onChanged: (v) => bloc
-                                      .add(PhoneNumberChanged(v)),
+                                  onChanged: (v) =>
+                                      bloc.add(PhoneNumberChanged(v)),
                                   style: const TextStyle(
                                       color: AppTheme.textPrimary,
                                       fontSize: AppConstants
                                           .kDefaultSubtitleFontSize),
                                   decoration: InputDecoration(
-                                    labelText:
-                                        context.l10n.phoneNumber,
+                                    labelText: context.l10n.phoneNumber,
                                     labelStyle: const TextStyle(
                                         color: AppTheme.textPrimary,
                                         fontSize: AppConstants
                                             .kDefaultSubtitleFontSize),
-                                    floatingLabelStyle:
-                                        WidgetStateTextStyle
-                                            .resolveWith((s) => TextStyle(
-                                                color: s.contains(
-                                                        WidgetState
-                                                            .focused)
+                                    floatingLabelStyle: WidgetStateTextStyle
+                                        .resolveWith((s) => TextStyle(
+                                            color:
+                                                s.contains(WidgetState.focused)
                                                     ? AppTheme.brand
-                                                    : AppTheme
-                                                        .textPrimary,
-                                                fontSize: AppConstants
-                                                    .kDefaultFormTitleFontSize)),
-                                    contentPadding:
-                                        const EdgeInsets.symmetric(
-                                            horizontal: 15,
-                                            vertical: 18),
+                                                    : AppTheme.textPrimary,
+                                            fontSize: AppConstants
+                                                .kDefaultFormTitleFontSize)),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 15, vertical: 18),
                                     // ✅ FIX: pass the bloc reference so the
                                     //         dial-code dropdown fires the
                                     //         correct event.
-                                    prefixIcon:
-                                        _buildPhonePrefix(bloc),
+                                    prefixIcon: _buildPhonePrefix(bloc),
+                                    suffixIcon: phoneValid
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            color: AppTheme.cardGreen,
+                                            size: 18,
+                                          )
+                                        : null,
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              AppConstants
-                                                  .kDefaultBorderRadius),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.kDefaultBorderRadius),
                                       borderSide: BorderSide(
-                                        color: !state.validationResult.isValid
-                                            ? AppTheme.error
-                                            : AppTheme.textSecondary,
+                                        color: phoneValid
+                                            ? AppTheme.cardGreen
+                                            : AppTheme.error,
                                         width: 1.5,
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              AppConstants
-                                                  .kDefaultBorderRadius),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.kDefaultBorderRadius),
                                       borderSide: BorderSide(
-                                        color: !state.validationResult.isValid
-                                            ? AppTheme.error
-                                            : AppTheme.brand,
+                                        color: phoneValid
+                                            ? AppTheme.cardGreen
+                                            : AppTheme.error,
                                         width: 2,
                                       ),
                                     ),
@@ -1694,8 +1585,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Padding(
                         padding: const EdgeInsets.only(bottom: 20),
                         child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(context.l10n.dateOfBirth,
                                   style: const TextStyle(
@@ -1705,19 +1595,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               const SizedBox(height: 10),
                               DobDropdownWidget(
                                   initialDate: _dob,
-                                  onChanged: (v) =>
-                                      setState(() => _dob = v)),
+                                  onChanged: (v) => setState(() => _dob = v)),
                               if (_dob == null)
+                                _mandatoryWarning(context.l10n.ageError)
+                              else
                                 _mandatoryWarning(
-                                    context.l10n.ageError),
+                                  context.l10n.dateOfBirthSelected,
+                                  isValid: true,
+                                ),
                             ])),
 
                     // ── Gender ──────────────────────────────────────────────
                     Padding(
                         padding: const EdgeInsets.only(bottom: 20),
                         child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(context.l10n.gender,
                                   style: const TextStyle(
@@ -1731,7 +1623,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       setState(() => _gender = v)),
                               if (_gender == null)
                                 _mandatoryWarning(
-                                    context.l10n.genderSelectionError),
+                                    context.l10n.genderSelectionError)
+                              else
+                                _mandatoryWarning(
+                                  context.l10n.genderSelected,
+                                  isValid: true,
+                                ),
                             ])),
 
                     // ── Height ──────────────────────────────────────────────
@@ -1747,8 +1644,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               ? ''
                               : null,
                       keyboardType: _isMetric == true
-                          ? const TextInputType.numberWithOptions(
-                              decimal: true)
+                          ? const TextInputType.numberWithOptions(decimal: true)
                           : TextInputType.text,
                       formatters: _isMetric == true
                           ? [
@@ -1772,14 +1668,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           : _isMetric == false
                               ? ' lbs'
                               : null,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       formatters: [
                         NumberBoundsFormatter(
                             maxWholeDigits: 3,
                             maxDecimalDigits: 2,
-                            maxVal:
-                                _isMetric == true ? 300.0 : 660.0)
+                            maxVal: _isMetric == true ? 300.0 : 660.0)
                       ],
                     ),
 
@@ -1797,51 +1692,51 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               });
                             })),
                     if (_isMetric == null)
+                      _mandatoryWarning(context.l10n.measurementUnitsRequired)
+                    else
                       _mandatoryWarning(
-                          'Please select metric or imperial units.'),
+                        context.l10n.measurementUnitsSelected,
+                        isValid: true,
+                      ),
                     const SizedBox(height: 30),
 
                     // ── Trainee section ─────────────────────────────────────
                     if (_isTrainer == false) ...[
                       const Divider(color: AppTheme.divider),
                       const SizedBox(height: 24),
-                      const Text('Trainee Profile',
-                          style: TextStyle(
+                      Text(context.l10n.traineeProfile,
+                          style: const TextStyle(
                               color: AppTheme.brand,
-                              fontSize:
-                                  AppConstants.kDefaultTitleFontSize,
+                              fontSize: AppConstants.kDefaultTitleFontSize,
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
-                      const Text(
-                          'Help trainers understand your goals, training background, and nutrition preferences.',
-                          style: TextStyle(
+                      Text(context.l10n.traineeProfileRegistrationIntro,
+                          style: const TextStyle(
                               color: AppTheme.textSecondary,
                               fontSize: 12,
                               height: 1.5)),
                       const SizedBox(height: 16),
                       _buildGroupedSelectionField(
-                        label: 'Training Goals',
+                        label: context.l10n.trainingGoals,
                         selectedItems: _traineeGoals,
-                        emptyText: 'Choose your training goals',
+                        emptyText: context.l10n.chooseTrainingGoals,
                         onTap: _openTraineeGoalsSelect,
-                        warningText:
-                            'Please select at least one training goal.',
+                        warningText: context.l10n.trainingGoalRequired,
                       ),
                       TrainingExperienceSelector(
                         selectedYears: _selectedTrainingExperienceYears,
-                        onSelected: (years) => setState(() =>
-                            _selectedTrainingExperienceYears = years),
+                        onSelected: (years) => setState(
+                            () => _selectedTrainingExperienceYears = years),
                         showRequiredWarning:
                             _selectedTrainingExperienceYears == null,
                       ),
                       _buildGroupedSelectionField(
-                        label: 'Preferred Diet',
+                        label: context.l10n.preferredDiet,
                         selectedItems: _preferredDiets,
-                        emptyText: 'Choose preferred diets',
+                        emptyText: context.l10n.choosePreferredDiets,
                         onTap: _openPreferredDietSelect,
                         chipColor: AppTheme.cardGreen,
-                        warningText:
-                            'Please select at least one preferred diet.',
+                        warningText: context.l10n.preferredDietRequired,
                       ),
                       const SizedBox(height: 10),
                       const Divider(color: AppTheme.divider),
@@ -1854,8 +1749,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Text(context.l10n.professionalInfo,
                           style: const TextStyle(
                               color: AppTheme.brand,
-                              fontSize:
-                                  AppConstants.kDefaultTitleFontSize,
+                              fontSize: AppConstants.kDefaultTitleFontSize,
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 20),
 
@@ -1863,8 +1757,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
                                   controller: _idNumberCtrl,
@@ -1878,37 +1771,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       fontSize: AppConstants
                                           .kDefaultSubtitleFontSize),
                                   decoration: InputDecoration(
-                                    labelText: context
-                                        .l10n.identificationNumber,
+                                    labelText:
+                                        context.l10n.identificationNumber,
                                     labelStyle: const TextStyle(
                                         color: AppTheme.textPrimary,
                                         fontSize: AppConstants
                                             .kDefaultSubtitleFontSize),
-                                    floatingLabelStyle:
-                                        const TextStyle(
-                                            color: AppTheme.brand,
-                                            fontSize: AppConstants
-                                                .kDefaultFormTitleFontSize),
+                                    floatingLabelStyle: const TextStyle(
+                                        color: AppTheme.brand,
+                                        fontSize: AppConstants
+                                            .kDefaultFormTitleFontSize),
                                     enabledBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(
-                                                AppConstants
-                                                    .kDefaultBorderRadius),
+                                        borderRadius: BorderRadius.circular(
+                                            AppConstants.kDefaultBorderRadius),
                                         borderSide: const BorderSide(
                                             color: AppTheme.textSecondary,
                                             width: 1.5)),
                                     focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(
-                                                AppConstants
-                                                    .kDefaultBorderRadius),
+                                        borderRadius: BorderRadius.circular(
+                                            AppConstants.kDefaultBorderRadius),
                                         borderSide: const BorderSide(
-                                            color: AppTheme.brand,
-                                            width: 2)),
-                                    contentPadding:
-                                        const EdgeInsets.symmetric(
-                                            horizontal: 15,
-                                            vertical: 15),
+                                            color: AppTheme.brand, width: 2)),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 15, vertical: 15),
                                   ),
                                 ),
                                 if (!RegExp(r'^[a-zA-Z0-9]{7,18}$')
@@ -1948,59 +1833,46 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         style: const TextStyle(
                                             color: AppTheme.textPrimary,
                                             fontSize: 20,
-                                            fontWeight:
-                                                FontWeight.bold),
+                                            fontWeight: FontWeight.bold),
                                         textAlign: TextAlign.center),
                                     const SizedBox(height: 25),
                                     SolidConfirmButton(
-                                        label:
-                                            context.l10n.scanViaCamera,
+                                        label: context.l10n.scanViaCamera,
                                         icon: CupertinoIcons.camera,
                                         onPressed: () {
                                           Navigator.pop(ctx);
                                           final messenger =
-                                              ScaffoldMessenger.of(
-                                                  context);
-                                          final msg = context.l10n
-                                              .idUploadedSuccessfully;
+                                              ScaffoldMessenger.of(context);
+                                          final msg = context
+                                              .l10n.idUploadedSuccessfully;
                                           Navigator.push(
                                                   context,
-                                                  AppRoutes
-                                                      .noTransitionRoute(
-                                                          const CustomCameraScreen(
-                                                              isIdScan:
-                                                                  true)))
+                                                  AppRoutes.noTransitionRoute(
+                                                      const CustomCameraScreen(
+                                                          isIdScan: true)))
                                               .then((v) {
                                             if (!mounted) return;
                                             if (v == true) {
                                               setState(() =>
-                                                  _idImageUploaded =
-                                                      true);
+                                                  _idImageUploaded = true);
                                               messenger.showSnackBar(
-                                                  SnackBar(
-                                                      content:
-                                                          Text(msg)));
+                                                  SnackBar(content: Text(msg)));
                                             }
                                           });
                                         }),
                                     const SizedBox(height: 15),
                                     OutlineActionButton(
-                                        label: context
-                                            .l10n.uploadFromDevice,
-                                        icon: const Icon(
-                                            CupertinoIcons.photo,
-                                            color: AppTheme.brand,
-                                            size: 20),
+                                        label: context.l10n.uploadFromDevice,
+                                        icon: const Icon(CupertinoIcons.photo,
+                                            color: AppTheme.brand, size: 20),
                                         onPressed: () async {
                                           Navigator.pop(ctx);
-                                          final f =
-                                              await ImagePicker()
-                                                  .pickImage(
-                                                      source: ImageSource
-                                                          .gallery);
+                                          final f = await ImagePicker()
+                                              .pickImage(
+                                                  source: ImageSource.gallery);
                                           if (f != null) {
-                                            setState(() =>
-                                                _idImageUploaded = true);
+                                            setState(
+                                                () => _idImageUploaded = true);
                                           }
                                         }),
                                     const SizedBox(height: 30),
@@ -2024,8 +1896,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           child: Column(children: [
                             Icon(
                                 _idImageUploaded
-                                    ? CupertinoIcons
-                                        .check_mark_circled_solid
+                                    ? CupertinoIcons.check_mark_circled_solid
                                     : CupertinoIcons.cloud_upload,
                                 color: _idImageUploaded
                                     ? AppTheme.brand
@@ -2062,8 +1933,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Text(context.l10n.specialities,
                           style: const TextStyle(
                               color: AppTheme.textPrimary,
-                              fontSize: AppConstants
-                                  .kDefaultSubtitleFontSize,
+                              fontSize: AppConstants.kDefaultSubtitleFontSize,
                               fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
                       GestureDetector(
@@ -2072,19 +1942,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           margin: const EdgeInsets.only(bottom: 5),
                           width: double.infinity,
                           padding: const EdgeInsets.all(15),
-                          constraints:
-                              const BoxConstraints(minHeight: 60),
+                          constraints: const BoxConstraints(minHeight: 60),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                   AppConstants.kDefaultBorderRadius),
                               border: Border.all(
-                                  color: AppTheme.textSecondary,
-                                  width: 1.5)),
+                                  color: AppTheme.textSecondary, width: 1.5)),
                           child: Row(children: [
                             Expanded(
                                 child: _trainerSpecialties.isEmpty
-                                    ? Text(
-                                        context.l10n.addSpecialities,
+                                    ? Text(context.l10n.addSpecialities,
                                         style: const TextStyle(
                                             color: AppTheme.textSecondary,
                                             fontSize: AppConstants
@@ -2100,10 +1967,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                                       vertical: 8),
                                                   decoration: BoxDecoration(
                                                       color: AppTheme.brand,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              AppConstants
-                                                                  .kDefaultBorderRadius)),
+                                                      borderRadius: BorderRadius
+                                                          .circular(AppConstants
+                                                              .kDefaultBorderRadius)),
                                                   child: Text(s,
                                                       style: const TextStyle(
                                                           color: AppTheme.bg,
@@ -2123,14 +1989,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             child: _mandatoryWarning(
                                 context.l10n.specialityRequired)),
                       if (_trainerSpecialties.isNotEmpty)
-                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _mandatoryWarning(
+                            context.l10n.selectionLooksGood,
+                            isValid: true,
+                          ),
+                        ),
 
                       // Credentials
                       Text(context.l10n.credentials,
                           style: const TextStyle(
                               color: AppTheme.brand,
-                              fontSize:
-                                  AppConstants.kDefaultTitleFontSize,
+                              fontSize: AppConstants.kDefaultTitleFontSize,
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
                       Text(context.l10n.credentialExplanation,
@@ -2145,11 +2016,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         return RegistrationCredentialCard(
                           credential: e.value,
                           allCredentials: _trainerCredentials,
-                          onSave: (d) => setState(
-                              () => _trainerCredentials[idx] = d),
+                          onSave: (d) =>
+                              setState(() => _trainerCredentials[idx] = d),
                           onEdit: () => setState(() =>
-                              _trainerCredentials[idx]['_isEditing'] =
-                                  true),
+                              _trainerCredentials[idx]['_isEditing'] = true),
                           onRemove: () {
                             HapticFeedback.lightImpact();
                             AppMotion.showPremiumDialog<void>(
@@ -2158,10 +2028,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       backgroundColor: AppTheme.surface,
                                       titlePadding: EdgeInsets.zero,
                                       shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(
-                                                  AppConstants
-                                                      .kDefaultBorderRadius)),
+                                          borderRadius: BorderRadius.circular(
+                                              AppConstants
+                                                  .kDefaultBorderRadius)),
                                       title: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           crossAxisAlignment:
@@ -2170,8 +2039,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                             Padding(
                                                 padding:
                                                     const EdgeInsets.all(20),
-                                                child: Text(
-                                                    context.l10n.remove,
+                                                child: Text(context.l10n.remove,
                                                     style: const TextStyle(
                                                         color: AppTheme.error,
                                                         fontWeight:
@@ -2193,22 +2061,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context),
-                                            child: Text(
-                                                context.l10n.cancel,
+                                            child: Text(context.l10n.cancel,
                                                 style: const TextStyle(
-                                                    color: AppTheme
-                                                        .textSecondary,
+                                                    color:
+                                                        AppTheme.textSecondary,
                                                     fontWeight:
                                                         FontWeight.bold))),
                                         TextButton(
                                             onPressed: () {
                                               Navigator.pop(context);
-                                              setState(() =>
-                                                  _trainerCredentials
-                                                      .removeAt(idx));
+                                              setState(() => _trainerCredentials
+                                                  .removeAt(idx));
                                             },
-                                            child: Text(
-                                                context.l10n.remove,
+                                            child: Text(context.l10n.remove,
                                                 style: const TextStyle(
                                                     color: AppTheme.error,
                                                     fontWeight:
@@ -2217,12 +2082,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     ));
                           },
                           onCancel: () => setState(() {
-                            if (_trainerCredentials[idx]['org'] ==
-                                null) {
+                            if (_trainerCredentials[idx]['org'] == null) {
                               _trainerCredentials.removeAt(idx);
                             } else {
-                              _trainerCredentials[idx]['_isEditing'] =
-                                  false;
+                              _trainerCredentials[idx]['_isEditing'] = false;
                             }
                           }),
                         );
@@ -2230,27 +2093,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       OutlineActionButton(
                           label: context.l10n.addCredential,
-                          icon: const Icon(Icons.add,
-                              color: AppTheme.brand),
+                          icon: const Icon(Icons.add, color: AppTheme.brand),
                           height: 55,
-                          onPressed: () => setState(() =>
-                              _trainerCredentials.add({
-                                'org': null,
-                                'cert': null,
-                                'certId': '',
-                                '_isEditing': true,
-                              }))),
+                          onPressed: () =>
+                              setState(() => _trainerCredentials.add({
+                                    'org': null,
+                                    'cert': null,
+                                    'certId': '',
+                                    '_isEditing': true,
+                                  }))),
                       if (_trainerCredentials.isEmpty)
                         Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: _mandatoryWarning(
                                 context.l10n.credentialRequired)),
-                      if (!isCredentialsValid &&
-                          _trainerCredentials.isNotEmpty)
+                      if (!isCredentialsValid && _trainerCredentials.isNotEmpty)
                         Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: _mandatoryWarning(
                                 context.l10n.saveAllCredentials)),
+                      if (isCredentialsValid)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _mandatoryWarning(
+                            context.l10n.selectionLooksGood,
+                            isValid: true,
+                          ),
+                        ),
 
                       // Places of Employment
                       const SizedBox(height: 30),
@@ -2259,8 +2128,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Text(context.l10n.placesOfEmployment,
                           style: const TextStyle(
                               color: AppTheme.brand,
-                              fontSize:
-                                  AppConstants.kDefaultTitleFontSize,
+                              fontSize: AppConstants.kDefaultTitleFontSize,
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
                       const Text(
@@ -2276,16 +2144,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         selected: _employmentMode,
                         title: context.l10n.hybridTraining,
                         description: context.l10n.hybridTrainingDesc,
-                        onTap: () =>
-                            setState(() => _employmentMode = 0),
+                        onTap: () => setState(() => _employmentMode = 0),
                       ),
                       const SizedBox(height: 10),
                       _employmentRadio(
                         mode: 1,
                         selected: _employmentMode,
                         title: context.l10n.onlineOnlyTraining,
-                        description:
-                            context.l10n.onlineOnlyTrainingDesc,
+                        description: context.l10n.onlineOnlyTrainingDesc,
                         onTap: () => setState(() {
                           _employmentMode = 1;
                           _regPlaces.clear();
@@ -2296,10 +2162,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         mode: 2,
                         selected: _employmentMode,
                         title: context.l10n.inPersonOnlyTraining,
-                        description:
-                            context.l10n.inPersonOnlyTrainingDesc,
-                        onTap: () =>
-                            setState(() => _employmentMode = 2),
+                        description: context.l10n.inPersonOnlyTrainingDesc,
+                        onTap: () => setState(() => _employmentMode = 2),
                       ),
                       const SizedBox(height: 16),
                       if (_employmentMode == null)
@@ -2309,12 +2173,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               'Please select how you deliver your training services.'),
                         ),
 
-                      if (_employmentMode == 0 ||
-                          _employmentMode == 2) ...[
+                      if (_employmentMode == 0 || _employmentMode == 2) ...[
                         if (_regPlaces.isEmpty)
                           Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.only(bottom: 8),
                               child: _mandatoryWarning(
                                   context.l10n.locationRequired)),
                         ..._regPlaces.asMap().entries.map((e) {
@@ -2322,84 +2184,67 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           final p = e.value;
                           return _RegPlaceCard(
                             place: p,
-                            onEdit: () => _openPlaceSheet(
-                                existing: p, editIdx: idx),
+                            onEdit: () =>
+                                _openPlaceSheet(existing: p, editIdx: idx),
                             onRemove: () {
                               HapticFeedback.lightImpact();
                               AppMotion.showPremiumDialog<void>(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                        backgroundColor:
-                                            AppTheme.surface,
+                                        backgroundColor: AppTheme.surface,
                                         titlePadding: EdgeInsets.zero,
                                         shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    AppConstants
-                                                        .kDefaultBorderRadius)),
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants
+                                                    .kDefaultBorderRadius)),
                                         title: Column(
-                                            mainAxisSize:
-                                                MainAxisSize.min,
+                                            mainAxisSize: MainAxisSize.min,
                                             crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .start,
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Padding(
                                                   padding:
-                                                      const EdgeInsets
-                                                          .all(20),
+                                                      const EdgeInsets.all(20),
                                                   child: Text(
-                                                      context.l10n
-                                                          .remove,
+                                                      context.l10n.remove,
                                                       style: const TextStyle(
-                                                          color: AppTheme
-                                                              .error,
+                                                          color: AppTheme.error,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .bold,
+                                                              FontWeight.bold,
                                                           fontSize: AppConstants
                                                               .kDefaultTitleFontSize))),
                                               const Divider(
-                                                  color: AppTheme
-                                                      .divider,
+                                                  color: AppTheme.divider,
                                                   height: 1),
                                             ]),
                                         content: const Text(
                                             'Are you sure you want to remove this location?',
                                             style: TextStyle(
-                                                color:
-                                                    AppTheme.textPrimary,
+                                                color: AppTheme.textPrimary,
                                                 fontSize: AppConstants
                                                     .kDefaultSubtitleFontSize,
                                                 height: 1.5)),
                                         actions: [
                                           TextButton(
                                               onPressed: () =>
-                                                  Navigator.pop(
-                                                      context),
-                                              child: Text(
-                                                  context.l10n.cancel,
+                                                  Navigator.pop(context),
+                                              child: Text(context.l10n.cancel,
                                                   style: const TextStyle(
                                                       color: AppTheme
                                                           .textSecondary,
                                                       fontWeight:
-                                                          FontWeight
-                                                              .bold))),
+                                                          FontWeight.bold))),
                                           TextButton(
                                               onPressed: () {
                                                 Navigator.pop(context);
                                                 setState(() =>
-                                                    _regPlaces
-                                                        .removeAt(idx));
+                                                    _regPlaces.removeAt(idx));
                                               },
-                                              child: Text(
-                                                  context.l10n.remove,
+                                              child: Text(context.l10n.remove,
                                                   style: const TextStyle(
-                                                      color:
-                                                          AppTheme.error,
+                                                      color: AppTheme.error,
                                                       fontWeight:
-                                                          FontWeight
-                                                              .bold)))
+                                                          FontWeight.bold)))
                                         ],
                                       ));
                             },
@@ -2408,8 +2253,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         const SizedBox(height: 8),
                         OutlineActionButton(
                             label: context.l10n.addLocation,
-                            icon: const Icon(
-                                Icons.add_location_alt_outlined,
+                            icon: const Icon(Icons.add_location_alt_outlined,
                                 color: AppTheme.brand),
                             height: 50,
                             onPressed: () async {
@@ -2418,12 +2262,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 await _scrollToField(_countryFieldKey);
                                 return;
                               }
-                              final adminInfo = CountryAdminInfo.resolve(
-                                  _selectedCountry);
+                              final adminInfo =
+                                  CountryAdminInfo.resolve(_selectedCountry);
                               if (adminInfo.regions.isNotEmpty &&
                                   _selectedRegion == null) {
-                                await _scrollToField(
-                                    _subdivisionFieldKey);
+                                await _scrollToField(_subdivisionFieldKey);
                                 return;
                               }
                               _openPlaceSheet();
@@ -2436,13 +2279,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ],
 
                     // ── Register button ─────────────────────────────────────
-                    BlocBuilder<PhoneValidationBloc,
-                        PhoneValidationState>(
+                    BlocBuilder<PhoneValidationBloc, PhoneValidationState>(
                       builder: (context, phoneState) {
                         return SolidConfirmButton(
                           label: context.l10n.registerAction,
-                          height:
-                              AppConstants.kDefaultButtonHeightLarge,
+                          height: AppConstants.kDefaultButtonHeightLarge,
                           onPressed: () {
                             if (!isAllValid || !phoneState.isValid) {
                               HapticFeedback.lightImpact();
@@ -2469,8 +2310,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   ..addAll(_regPlaces);
                               }
                             } else {
-                              final expYears =
-                                  _selectedTrainingExperienceYears;
+                              final expYears = _selectedTrainingExperienceYears;
                               if (expYears == null) return;
                               appState.saveTraineePreferences(
                                 goals: _traineeGoals,
@@ -2479,8 +2319,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               );
                             }
                             Navigator.pop(context);
-                            AppUtils.showToast(context,
-                                context.l10n.accountCreatedSuccess);
+                            AppUtils.showToast(
+                                context, context.l10n.accountCreatedSuccess);
                           },
                         );
                       },
@@ -2503,9 +2343,7 @@ class _RegPlaceCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onRemove;
   const _RegPlaceCard(
-      {required this.place,
-      required this.onEdit,
-      required this.onRemove});
+      {required this.place, required this.onEdit, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -2559,11 +2397,10 @@ class _RegPlaceCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: 13)),
           subtitle: Text(place['address'] as String? ?? '',
-              style: const TextStyle(
-                  color: AppTheme.textSecondary, fontSize: 11)),
+              style:
+                  const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
           trailing: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6)),
@@ -2590,8 +2427,7 @@ class _RegPlaceCard extends StatelessWidget {
               icon: const Icon(Icons.delete_outline,
                   color: AppTheme.error, size: 14),
               label: Text(context.l10n.remove,
-                  style: const TextStyle(
-                      color: AppTheme.error, fontSize: 12))),
+                  style: const TextStyle(color: AppTheme.error, fontSize: 12))),
         ]),
       ]),
     );
@@ -2649,8 +2485,7 @@ class _RegistrationCredentialCardState
             ..addListener(() => setState(() {})));
     } else {
       _certs.add({'cert': null, 'certId': ''});
-      _idCtrls.add(TextEditingController()
-        ..addListener(() => setState(() {})));
+      _idCtrls.add(TextEditingController()..addListener(() => setState(() {})));
     }
   }
 
@@ -2668,17 +2503,14 @@ class _RegistrationCredentialCardState
         for (final c in widget.allCredentials) {
           if (c != widget.credential && c['org'] == org) return false;
         }
-        return (MedicalData.kTrainerCertifications[org] ?? const [])
-            .isNotEmpty;
+        return (MedicalData.kTrainerCertifications[org] ?? const []).isNotEmpty;
       }).toList();
 
   List<String> _certsFor(String org, {int? ignoreIndex}) {
     final all = MedicalData.kTrainerCertifications[org] ?? [];
     final used = <String>{};
     for (final c in widget.allCredentials) {
-      if (c != widget.credential &&
-          c['org'] == org &&
-          c['certs'] != null) {
+      if (c != widget.credential && c['org'] == org && c['certs'] != null) {
         for (final cert in c['certs']) {
           if (cert['cert'] != null) used.add(cert['cert'] as String);
         }
@@ -2738,23 +2570,19 @@ class _RegistrationCredentialCardState
             title: context.l10n.selectCertificate,
             items: certs,
             selected: _certs[index]['cert'],
-            onSelect: (v) =>
-                setState(() => _certs[index]['cert'] = v)));
+            onSelect: (v) => setState(() => _certs[index]['cert'] = v)));
   }
 
   String _certLabel(int i) {
     final org = _org;
     if (org == null) return 'Certificate ID';
     final orgMatch = RegExp(r'\(([^)]+)\)').firstMatch(org);
-    final orgAbbr =
-        orgMatch?.group(1) ?? org.split(' ').first;
+    final orgAbbr = orgMatch?.group(1) ?? org.split(' ').first;
     final cert = _certs[i]['cert'];
     if (cert == null) return 'Certificate ID ($orgAbbr)';
-    final certMatch =
-        RegExp(r'\(([^)]+)\)').firstMatch(cert);
+    final certMatch = RegExp(r'\(([^)]+)\)').firstMatch(cert);
     final certAbbr = certMatch != null
-        ? (certMatch.group(1) ?? '')
-            .replaceAll(RegExp(r'^[A-Z]+-'), '')
+        ? (certMatch.group(1) ?? '').replaceAll(RegExp(r'^[A-Z]+-'), '')
         : cert.split(' ').take(3).join(' ');
     return 'Certificate ID ($orgAbbr - $certAbbr)';
   }
@@ -2776,211 +2604,209 @@ class _RegistrationCredentialCardState
           borderRadius:
               BorderRadius.circular(AppConstants.kDefaultBorderRadius),
           border: Border.all(
-              color:
-                  editing ? AppTheme.brand : AppTheme.textSecondary,
+              color: editing ? AppTheme.brand : AppTheme.textSecondary,
               width: 1.5)),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _Label('Organisation', editing: editing),
-            const SizedBox(height: 8),
-            _Tappable(
-                value: _org,
-                placeholder: 'Select Organisation',
-                active: editing,
-                dimmed: !editing,
-                onTap: editing ? _pickOrg : null),
-            if (editing && _org == null)
-              _err(context.l10n.organisationRequired),
-            const SizedBox(height: 14),
-            ...List.generate(
-                _certs.length,
-                (i) => Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.stretch,
-                        children: [
-                          if (i > 0)
-                            const Column(children: [
-                              SizedBox(height: 10),
-                              Divider(
-                                  color: AppTheme.divider, height: 1),
-                              SizedBox(height: 10),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          _Label('Organisation', editing: editing),
+          const SizedBox(height: 8),
+          _Tappable(
+              value: _org,
+              placeholder: 'Select Organisation',
+              active: editing,
+              dimmed: !editing,
+              onTap: editing ? _pickOrg : null),
+          if (editing && _org == null) _err(context.l10n.organisationRequired),
+          const SizedBox(height: 14),
+          ...List.generate(
+              _certs.length,
+              (i) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (i > 0) _fullBleedDivider(),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _Label('Certificate', editing: editing),
+                              if (editing && _certs.length > 1)
+                                GestureDetector(
+                                    onTap: () => setState(() {
+                                          _certs.removeAt(i);
+                                          _idCtrls[i].dispose();
+                                          _idCtrls.removeAt(i);
+                                        }),
+                                    child: const Icon(Icons.close,
+                                        color: AppTheme.error, size: 18))
                             ]),
-                          Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                _Label('Certificate',
-                                    editing: editing),
-                                if (editing && _certs.length > 1)
-                                  GestureDetector(
-                                      onTap: () => setState(() {
-                                            _certs.removeAt(i);
-                                            _idCtrls[i].dispose();
-                                            _idCtrls.removeAt(i);
-                                          }),
-                                      child: const Icon(Icons.close,
-                                          color: AppTheme.error,
-                                          size: 18))
-                              ]),
-                          const SizedBox(height: 8),
-                          _Tappable(
-                              value: _certs[i]['cert'],
-                              placeholder: _org == null
-                                  ? 'Select organisation first'
-                                  : 'Select Certificate',
-                              active: editing && _org != null,
-                              dimmed: !editing || _org == null,
-                              onTap: (editing && _org != null)
-                                  ? () => _pickCert(i)
-                                  : null),
-                          if (editing &&
-                              _org != null &&
-                              _certs[i]['cert'] == null)
-                            _err(context.l10n.certificateRequired),
-                          const SizedBox(height: 14),
-                          _Label(_certLabel(i), editing: editing),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _idCtrls[i],
-                            readOnly: !certIdEditable,
-                            enabled: certIdEditable,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'[a-zA-Z0-9\-/]'))
-                            ],
-                            style: TextStyle(
-                                color: certIdEditable
-                                    ? AppTheme.textPrimary
-                                    : AppTheme.textSecondary,
-                                fontSize: AppConstants
-                                    .kDefaultSubtitleFontSize),
-                            decoration: InputDecoration(
-                              hintText: _org == null
-                                  ? 'Select organisation first'
-                                  : null,
-                              hintStyle: const TextStyle(
-                                  color: AppTheme.textSecondary,
-                                  fontSize: 14),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 15),
-                              enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppConstants
-                                          .kDefaultBorderRadius),
-                                  borderSide: BorderSide(
-                                      color: certIdEditable
-                                          ? AppTheme.textSecondary
-                                          : AppTheme.divider,
-                                      width: 1.5)),
-                              disabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppConstants
-                                          .kDefaultBorderRadius),
-                                  borderSide: const BorderSide(
-                                      color: AppTheme.divider,
-                                      width: 1.5)),
-                              focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppConstants
-                                          .kDefaultBorderRadius),
-                                  borderSide: const BorderSide(
-                                      color: AppTheme.brand,
-                                      width: 2)),
-                            ),
+                        const SizedBox(height: 8),
+                        _Tappable(
+                            value: _certs[i]['cert'],
+                            placeholder: _org == null
+                                ? 'Select organisation first'
+                                : 'Select Certificate',
+                            active: editing && _org != null,
+                            dimmed: !editing || _org == null,
+                            onTap: (editing && _org != null)
+                                ? () => _pickCert(i)
+                                : null),
+                        if (editing &&
+                            _org != null &&
+                            _certs[i]['cert'] == null)
+                          _err(context.l10n.certificateRequired),
+                        const SizedBox(height: 14),
+                        _Label(_certLabel(i), editing: editing),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _idCtrls[i],
+                          readOnly: !certIdEditable,
+                          enabled: certIdEditable,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[a-zA-Z0-9\-/]'))
+                          ],
+                          style: TextStyle(
+                              color: certIdEditable
+                                  ? AppTheme.textPrimary
+                                  : Colors.white38,
+                              fontSize: AppConstants.kDefaultSubtitleFontSize),
+                          decoration: InputDecoration(
+                            filled: !certIdEditable,
+                            fillColor: certIdEditable
+                                ? Colors.transparent
+                                : Colors.white.withValues(alpha: 0.02),
+                            hintText: _org == null
+                                ? 'Select organisation first'
+                                : null,
+                            hintStyle: const TextStyle(
+                                color: AppTheme.textSecondary, fontSize: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 15),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.kDefaultBorderRadius),
+                                borderSide: BorderSide(
+                                    color: certIdEditable
+                                        ? AppTheme.textSecondary
+                                        : AppTheme.divider,
+                                    width: 1.5)),
+                            disabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.kDefaultBorderRadius),
+                                borderSide: const BorderSide(
+                                    color: Colors.white12, width: 1.5)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.kDefaultBorderRadius),
+                                borderSide: const BorderSide(
+                                    color: AppTheme.brand, width: 2)),
                           ),
-                          if (certIdEditable &&
-                              !RegExp(r'^[a-zA-Z0-9\-/]{3,}$')
-                                  .hasMatch(_idCtrls[i].text))
-                            _err(context.l10n.certificateIdRequired),
-                          const SizedBox(height: 14),
-                        ])),
-            if (editing && org != null)
-              Padding(
-                  padding: const EdgeInsets.only(bottom: 15),
-                  child: canAddMore
-                      ? GestureDetector(
-                          onTap: () => setState(() {
-                                _certs.add(
-                                    {'cert': null, 'certId': ''});
-                                _idCtrls.add(TextEditingController()
-                                  ..addListener(
-                                      () => setState(() {})));
-                              }),
-                          child: const Row(children: [
-                            Icon(Icons.add_circle_outline,
-                                color: AppTheme.brand, size: 16),
-                            SizedBox(width: 6),
-                            Text(
-                                'Add another certificate from this organisation',
-                                style: TextStyle(
-                                    color: AppTheme.brand,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold))
-                          ]))
-                      : _err(_certs.length >= _maxCertsForOrg
-                          ? context.l10n.credentialLimitReached(
-                              org,
-                              _maxCertsForOrg.toString(),
-                            )
-                          : context.l10n.allCertificatesInUse)),
-            if (editing)
-              Row(children: [
-                Expanded(
-                    child: SolidConfirmButton(
-                        label: context.l10n.save
-                            .toLowerCase()
-                            .replaceFirst(
-                                context.l10n.save.toLowerCase()[0],
-                                context.l10n.save[0]),
-                        height: 40,
-                        onPressed: _isValid
-                            ? () {
-                                final resCerts = List.generate(
-                                    _certs.length,
-                                    (i) => {
-                                          'cert': _certs[i]['cert'],
-                                          'certId':
-                                              _idCtrls[i].text.trim(),
-                                        });
-                                widget.onSave({
-                                  'org': org,
-                                  'certs': resCerts,
-                                  '_isEditing': false,
-                                });
-                              }
-                            : null)),
-                const SizedBox(width: 12),
-                Expanded(
-                    child: OutlineActionButton(
-                        label: context.l10n.cancel,
-                        textColor: AppTheme.textPrimary,
-                        borderColor: AppTheme.textSecondary,
-                        height: 40,
-                        onPressed: widget.onCancel)),
-              ])
-            else
-              Row(children: [
-                Expanded(
-                    child: OutlineActionButton(
-                        label: context.l10n.edit,
-                        icon: const Icon(Icons.edit,
-                            size: 14, color: AppTheme.brand),
-                        height: 40,
-                        onPressed: widget.onEdit)),
-                const SizedBox(width: 12),
-                Expanded(
-                    child: OutlineActionButton(
-                        label: context.l10n.remove,
-                        icon: const Icon(Icons.delete_outline,
-                            size: 14, color: AppTheme.error),
-                        textColor: AppTheme.error,
-                        borderColor: AppTheme.error,
-                        height: 40,
-                        onPressed: widget.onRemove)),
-              ]),
-          ]),
+                        ),
+                        if (certIdEditable &&
+                            !RegExp(r'^[a-zA-Z0-9\-/]{3,}$')
+                                .hasMatch(_idCtrls[i].text))
+                          _err(context.l10n.certificateIdRequired),
+                        const SizedBox(height: 14),
+                      ])),
+          if (editing && org != null)
+            Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: canAddMore
+                    ? GestureDetector(
+                        onTap: () => setState(() {
+                              _certs.add({'cert': null, 'certId': ''});
+                              _idCtrls.add(TextEditingController()
+                                ..addListener(() => setState(() {})));
+                            }),
+                        child: const Row(children: [
+                          Icon(Icons.add_circle_outline,
+                              color: AppTheme.brand, size: 16),
+                          SizedBox(width: 6),
+                          Text('Add another certificate from this organisation',
+                              style: TextStyle(
+                                  color: AppTheme.brand,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold))
+                        ]))
+                    : _err(_certs.length >= _maxCertsForOrg
+                        ? context.l10n.credentialLimitReached(
+                            org,
+                            _maxCertsForOrg.toString(),
+                          )
+                        : context.l10n.allCertificatesInUse)),
+          if (editing)
+            Row(children: [
+              Expanded(
+                  child: SolidConfirmButton(
+                      label: context.l10n.save.toLowerCase().replaceFirst(
+                          context.l10n.save.toLowerCase()[0],
+                          context.l10n.save[0]),
+                      height: 40,
+                      onPressed: _isValid
+                          ? () {
+                              final resCerts = List.generate(
+                                  _certs.length,
+                                  (i) => {
+                                        'cert': _certs[i]['cert'],
+                                        'certId': _idCtrls[i].text.trim(),
+                                      });
+                              widget.onSave({
+                                'org': org,
+                                'certs': resCerts,
+                                '_isEditing': false,
+                              });
+                            }
+                          : null)),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: OutlineActionButton(
+                      label: context.l10n.cancel,
+                      textColor: AppTheme.textPrimary,
+                      borderColor: AppTheme.textSecondary,
+                      height: 40,
+                      onPressed: widget.onCancel)),
+            ])
+          else
+            Row(children: [
+              Expanded(
+                  child: OutlineActionButton(
+                      label: context.l10n.edit,
+                      icon: const Icon(Icons.edit,
+                          size: 14, color: AppTheme.brand),
+                      height: 40,
+                      onPressed: widget.onEdit)),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: OutlineActionButton(
+                      label: context.l10n.remove,
+                      icon: const Icon(Icons.delete_outline,
+                          size: 14, color: AppTheme.error),
+                      textColor: AppTheme.error,
+                      borderColor: AppTheme.error,
+                      height: 40,
+                      onPressed: widget.onRemove)),
+            ]),
+        ]),
+      ),
+    );
+  }
+
+  Widget _fullBleedDivider() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Transform.translate(
+          offset: const Offset(-15, 0),
+          child: SizedBox(
+            width: constraints.maxWidth + 30,
+            child: const Divider(
+              color: AppTheme.divider,
+              height: 1,
+              thickness: 1,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -3046,8 +2872,8 @@ class _PickerDialog extends StatelessWidget {
                 onSelect(item);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 color: sel
                     ? AppTheme.brand.withValues(alpha: 0.1)
                     : Colors.transparent,
@@ -3057,18 +2883,14 @@ class _PickerDialog extends StatelessWidget {
                       child: Text(item,
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                              color: sel
-                                  ? AppTheme.brand
-                                  : AppTheme.textPrimary,
-                              fontWeight: sel
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              fontSize: AppConstants
-                                  .kDefaultSubtitleFontSize)),
+                              color:
+                                  sel ? AppTheme.brand : AppTheme.textPrimary,
+                              fontWeight:
+                                  sel ? FontWeight.bold : FontWeight.normal,
+                              fontSize: AppConstants.kDefaultSubtitleFontSize)),
                     ),
                     if (sel)
-                      const Icon(Icons.check,
-                          color: AppTheme.brand, size: 20),
+                      const Icon(Icons.check, color: AppTheme.brand, size: 20),
                   ],
                 ),
               ),
@@ -3093,9 +2915,7 @@ class _Label extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8, left: 4),
         child: Text(text,
             style: TextStyle(
-                color: editing
-                    ? AppTheme.textSecondary
-                    : AppTheme.textPrimary,
+                color: editing ? AppTheme.textSecondary : Colors.white38,
                 fontSize: 13,
                 fontWeight: FontWeight.bold)));
   }
@@ -3121,9 +2941,7 @@ class _Tappable extends StatelessWidget {
     final isPlaceholder = value == null;
     final isEnabled = onTap != null;
     final textColor = isEnabled
-        ? (isPlaceholder
-            ? AppTheme.textSecondary
-            : AppTheme.textPrimary)
+        ? (isPlaceholder ? AppTheme.textSecondary : AppTheme.textPrimary)
         : (isPlaceholder ? Colors.white38 : AppTheme.textSecondary);
     return GestureDetector(
       onTap: isEnabled
@@ -3135,8 +2953,7 @@ class _Tappable extends StatelessWidget {
       child: Container(
         constraints: const BoxConstraints(
             minHeight: AppConstants.kDefaultButtonHeightLarge),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isEnabled
               ? Colors.transparent
@@ -3154,15 +2971,14 @@ class _Tappable extends StatelessWidget {
               child: Text(
                 value ?? placeholder,
                 style: TextStyle(
-                  color: dimmed ? AppTheme.textSecondary : textColor,
+                  color: dimmed ? Colors.white38 : textColor,
                   fontSize: AppConstants.kDefaultSubtitleFontSize,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             if (active)
-              const Icon(Icons.arrow_drop_down,
-                  color: AppTheme.textSecondary),
+              const Icon(Icons.arrow_drop_down, color: AppTheme.textSecondary),
           ],
         ),
       ),
@@ -3188,71 +3004,64 @@ class ForgotPasswordScreen extends StatelessWidget {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.lock_reset,
-                    size: 80, color: AppTheme.brand),
-                const SizedBox(height: 30),
-                Text(context.l10n.forgotPassword,
-                    style: const TextStyle(
-                        color: AppTheme.brand,
-                        fontSize: AppConstants.kDefaultTitleFontSize,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 15),
-                Text(context.l10n.resetPasswordInstructions,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize:
-                            AppConstants.kDefaultSubtitleFontSize,
-                        height: 1.5)),
-                const SizedBox(height: 40),
-                TextField(
-                  cursorColor: AppTheme.brand,
-                  style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: AppConstants.kDefaultSubtitleFontSize),
-                  decoration: InputDecoration(
-                    labelText: context.l10n.idOrEmail,
-                    labelStyle: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize:
-                            AppConstants.kDefaultSubtitleFontSize),
-                    floatingLabelStyle:
-                        WidgetStateTextStyle.resolveWith((s) => TextStyle(
-                            color: s.contains(WidgetState.focused)
-                                ? AppTheme.brand
-                                : AppTheme.textPrimary,
-                            fontSize:
-                                AppConstants.kDefaultFormTitleFontSize)),
-                    prefixIcon: const Icon(CupertinoIcons.mail_solid,
-                        size: AppConstants.kDefaultIconSize,
-                        color: AppTheme.textSecondary),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 18),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                            AppConstants.kDefaultBorderRadius),
-                        borderSide: const BorderSide(
-                            color: AppTheme.textSecondary, width: 1.5)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                            AppConstants.kDefaultBorderRadius),
-                        borderSide: const BorderSide(
-                            color: AppTheme.brand, width: 2)),
-                  ),
-                ),
-                const SizedBox(height: 40),
-                SolidConfirmButton(
-                    label: context.l10n.sendResetLink,
-                    height: AppConstants.kDefaultButtonHeightLarge,
-                    onPressed: () {
-                      Navigator.pop(context);
-                      AppUtils.showToast(
-                          context, context.l10n.resetLinkSent);
-                    }),
-              ]),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.lock_reset, size: 80, color: AppTheme.brand),
+            const SizedBox(height: 30),
+            Text(context.l10n.forgotPassword,
+                style: const TextStyle(
+                    color: AppTheme.brand,
+                    fontSize: AppConstants.kDefaultTitleFontSize,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 15),
+            Text(context.l10n.resetPasswordInstructions,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: AppConstants.kDefaultSubtitleFontSize,
+                    height: 1.5)),
+            const SizedBox(height: 40),
+            TextField(
+              cursorColor: AppTheme.brand,
+              style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: AppConstants.kDefaultSubtitleFontSize),
+              decoration: InputDecoration(
+                labelText: context.l10n.idOrEmail,
+                labelStyle: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: AppConstants.kDefaultSubtitleFontSize),
+                floatingLabelStyle: WidgetStateTextStyle.resolveWith((s) =>
+                    TextStyle(
+                        color: s.contains(WidgetState.focused)
+                            ? AppTheme.brand
+                            : AppTheme.textPrimary,
+                        fontSize: AppConstants.kDefaultFormTitleFontSize)),
+                prefixIcon: const Icon(CupertinoIcons.mail_solid,
+                    size: AppConstants.kDefaultIconSize,
+                    color: AppTheme.textSecondary),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                        AppConstants.kDefaultBorderRadius),
+                    borderSide: const BorderSide(
+                        color: AppTheme.textSecondary, width: 1.5)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                        AppConstants.kDefaultBorderRadius),
+                    borderSide:
+                        const BorderSide(color: AppTheme.brand, width: 2)),
+              ),
+            ),
+            const SizedBox(height: 40),
+            SolidConfirmButton(
+                label: context.l10n.sendResetLink,
+                height: AppConstants.kDefaultButtonHeightLarge,
+                onPressed: () {
+                  Navigator.pop(context);
+                  AppUtils.showToast(context, context.l10n.resetLinkSent);
+                }),
+          ]),
         ),
       ),
     );

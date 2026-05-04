@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../models/programme.dart';
+import '../models/m_programmes.dart';
 
 // ===========================================================================
 // FILTER MODEL
