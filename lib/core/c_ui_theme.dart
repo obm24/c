@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'animations/app_motion.dart';
+import 'animations/motion.dart';
 
 class AppTheme {
   // ── Core dark surfaces ───────────────────────────────────────────────────

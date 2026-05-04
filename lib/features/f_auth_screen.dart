@@ -9,7 +9,7 @@ import '../core/c_constants.dart';
 import '../core/c_core_utils.dart';
 import '../core/c_custom_controls.dart';
 import '../core/c_state.dart';
-import '../core/animations/app_motion.dart';
+import '../core/animations/motion.dart';
 import '../core/c_phone_validator.dart';
 import '../core/c_warnings.dart';
 import '../core/c_trainee_profile.dart';

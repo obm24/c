@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'animations/app_motion.dart';
+import 'animations/motion.dart';
 import 'c_constants.dart';
 import 'c_ui_theme.dart';
 

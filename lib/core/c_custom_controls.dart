@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:equatable/equatable.dart';
 import '../models/goal_model.dart';
 
-import 'animations/app_motion.dart';
+import 'animations/motion.dart';
 import 'c_ui_theme.dart';
 import 'c_constants.dart';
 import 'c_core_utils.dart';

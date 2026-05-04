@@ -7,7 +7,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'core/c_ui_theme.dart';
 import 'core/c_state.dart';
 import 'core/c_error_screen.dart';
-import 'core/animations/app_motion.dart';
+import 'core/animations/motion.dart';
 import 'repositories/exercise_repository.dart';
 
 // Adjust path depending on your code generation/l10n setup

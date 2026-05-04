@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/app_localizations_en.dart';
-import 'animations/app_motion.dart';
+import 'animations/motion.dart';
 import 'c_ui_theme.dart';
 import 'c_constants.dart';
 import 'c_custom_controls.dart';

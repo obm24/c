@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 import '../core/c_ui_theme.dart';
 import '../core/c_constants.dart';
 import '../core/c_core_utils.dart';
-import '../core/animations/app_motion.dart';
+import '../core/animations/motion.dart';
 import '../core/c_visual_effects.dart';
 import '../models/message_models.dart';
 import '../bloc/bloc_messages.dart';
