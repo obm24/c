@@ -51,6 +51,18 @@ class AppState extends ChangeNotifier {
   String distanceUnit = 'metric';
   String measurementUnit = 'metric';
   bool isDevicePaired = false;
+  String currentRole = 'Trainer';
+
+  bool get isTrainer => currentRole.toLowerCase() == 'trainer';
+  bool get isTrainee => currentRole.toLowerCase() == 'trainee';
+
+  void setRole(String role) {
+    final normalized = role.trim().toLowerCase();
+    final nextRole = normalized == 'trainee' ? 'Trainee' : 'Trainer';
+    if (currentRole == nextRole) return;
+    currentRole = nextRole;
+    notifyListeners();
+  }
 
   bool isHolidayMode = false;
   bool isUnavailableMode = false;

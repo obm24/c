@@ -20,6 +20,13 @@ extension LocalizedBuildContext on BuildContext {
 }
 
 // --- UTILS ---
+String dashboardGreeting() {
+  final hour = DateTime.now().hour;
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 class AppRoutes {
   static Route<T> noTransitionRoute<T>(Widget page) {
     return AppMotion.pageRoute<T>(page);

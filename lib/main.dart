@@ -59,7 +59,7 @@ class TnTApp extends StatelessWidget {
         path: '/programmes',
         pageBuilder: (context, state) => AppMotion.goRouterPage(
           key: state.pageKey,
-          child: const ProgrammesScreen(),
+          child: const ProgramBuilderScreen(),
         ),
       ),
       GoRoute(

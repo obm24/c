@@ -8,10 +8,12 @@ import '../core/c_visual_effects.dart';
 import 'trainee_public_profile_screen.dart' as trainee_public;
 import 'trainer_public_profile_screen.dart' as trainer_public;
 
-// GLOBAL SEARCH BAR - with initials avatars in results
+// =============================================================================
+// GLOBAL SEARCH BAR — with initials avatars in results
 // =============================================================================
 class GlobalSearchBar extends StatefulWidget {
   const GlobalSearchBar({super.key});
+
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
 }
@@ -25,13 +27,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       'name': 'Ahmed al-Demerdash',
       'username': 'ahmed1',
       'type': 'Trainer',
-      'object': appState.trainerAhmed
+      'object': appState.trainerAhmed,
     },
     {
       'name': 'Omar Magdy',
       'username': 'obm24',
       'type': 'Trainee',
-      'object': appState.traineeOmar
+      'object': appState.traineeOmar,
     },
   ];
 
@@ -44,7 +46,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   @override
   Widget build(BuildContext context) {
     final results = _query.isEmpty
-        ? []
+        ? <Map<String, dynamic>>[]
         : _mockUsers
             .where((u) =>
                 u['name']
@@ -57,115 +59,148 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     .contains(_query.toLowerCase()))
             .toList();
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Padding(
-        padding: EdgeInsets.only(bottom: _query.isNotEmpty ? 10 : 25),
-        child: TextField(
-          focusNode: _focusNode,
-          onTapOutside: (event) => _focusNode.unfocus(),
-          style: const TextStyle(color: AppTheme.textPrimary),
-          onChanged: (v) => setState(() => _query = v),
-          decoration: InputDecoration(
-            hintText: 'Search',
-            hintStyle:
-                const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-            prefixIcon: const Icon(CupertinoIcons.search,
-                color: AppTheme.textSecondary, size: 20),
-            filled: true,
-            fillColor: AppTheme.surface,
-            contentPadding: const EdgeInsets.symmetric(vertical: 0),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide.none),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: _query.isNotEmpty ? 10 : 20),
+          child: TextField(
+            focusNode: _focusNode,
+            onTapOutside: (event) => _focusNode.unfocus(),
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              decoration: TextDecoration.none,
+            ),
+            onChanged: (v) => setState(() => _query = v),
+            decoration: InputDecoration(
+              hintText: 'Search trainers, workouts, tips…',
+              hintStyle: const TextStyle(
+                  color: AppTheme.textSecondary, fontSize: 14),
+              prefixIcon: const Icon(CupertinoIcons.search,
+                  color: AppTheme.textSecondary, size: 20),
+              suffixIcon: _query.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () => setState(() => _query = ''),
+                      child: const Icon(CupertinoIcons.xmark_circle_fill,
+                          color: AppTheme.textSecondary, size: 16),
+                    )
+                  : null,
+              filled: true,
+              fillColor: AppTheme.surface,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
         ),
-      ),
-      if (_query.isNotEmpty)
-        TnTPremiumCard(
-          margin: const EdgeInsets.only(bottom: 25),
-          padding: EdgeInsets.zero,
-          radius: 15,
-          child: results.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(context.l10n.noResultsFound,
-                      style: const TextStyle(color: AppTheme.textSecondary)))
-              : Column(
-                  children: results.asMap().entries.expand((entry) {
-                  final res = entry.value;
-                  return [
-                    if (entry.key > 0)
-                      const Divider(color: AppTheme.divider, height: 1),
-                    ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: AppTheme.bg,
-                        child: Text(
-                          (res['name'] as String)
-                              .split(' ')
-                              .take(2)
-                              .map((w) => w.isNotEmpty ? w[0] : '')
-                              .join()
-                              .toUpperCase(),
-                          style: const TextStyle(
-                              color: AppTheme.brand,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13),
-                        ),
+        if (_query.isNotEmpty)
+          TnTPremiumCard(
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: EdgeInsets.zero,
+            radius: 16,
+            child: results.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      context.l10n.noResultsFound,
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        decoration: TextDecoration.none,
                       ),
-                      title: Text(res['name'],
-                          style: const TextStyle(color: AppTheme.textPrimary)),
-                      subtitle: Text('@${res['username']} · ${res['type']}',
-                          style: const TextStyle(
-                              color: AppTheme.textSecondary, fontSize: 12)),
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        _focusNode.unfocus();
-                        if (res['object'] != null) {
-                          if (res['type'] == 'Trainer') {
-                            Navigator.push(
-                                context,
-                                AppRoutes.noTransitionRoute(
+                    ),
+                  )
+                : Column(
+                    children: results.asMap().entries.expand((entry) {
+                      final res = entry.value;
+                      return [
+                        if (entry.key > 0)
+                          const Divider(color: AppTheme.divider, height: 1),
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: AppTheme.bg,
+                            child: Text(
+                              (res['name'] as String)
+                                  .split(' ')
+                                  .take(2)
+                                  .map((w) => w.isNotEmpty ? w[0] : '')
+                                  .join()
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                color: AppTheme.brand,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            res['name'],
+                            style: const TextStyle(
+                              color: AppTheme.textPrimary,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '@${res['username']} · ${res['type']}',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 12,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _focusNode.unfocus();
+                            if (res['object'] != null) {
+                              if (res['type'] == 'Trainer') {
+                                Navigator.push(
+                                  context,
+                                  AppRoutes.noTransitionRoute(
                                     trainer_public.TrainerPublicProfileScreen(
-                                        trainer: res['object'])));
-                          } else {
-                            Navigator.push(
-                                context,
-                                AppRoutes.noTransitionRoute(
+                                        trainer: res['object']),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  AppRoutes.noTransitionRoute(
                                     trainee_public.TraineePublicProfileScreen(
-                                        trainee: res['object'])));
-                          }
-                        } else {
-                          AppUtils.showToast(
-                              context, context.l10n.mockUserNoProfile);
-                        }
-                      },
-                    )
-                  ];
-                }).toList()),
-        ),
-    ]);
+                                        trainee: res['object']),
+                                  ),
+                                );
+                              }
+                            } else {
+                              AppUtils.showToast(
+                                  context, context.l10n.mockUserNoProfile);
+                            }
+                          },
+                        ),
+                      ];
+                    }).toList(),
+                  ),
+          ),
+      ],
+    );
   }
 }
 
 // =============================================================================
-// TAB 1 - EXPLORE PAGE
-// Instagram-style discovery with: search, category chips, trending trainers
-// row, featured banner carousel, and a mixed-size masonry-style grid.
+// TAB 1 — EXPLORE PAGE
 // =============================================================================
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
+
   @override
   State<ExplorePage> createState() => ExplorePageState();
 }
 
 class ExplorePageState extends State<ExplorePage> {
-  final String _query = '';
-  final String _selectedCategory = 'All';
+  String _selectedCategory = 'All';
 
-  // Category with emoji for quick scanning
-  // ignore: unused_field
   static const List<_ExploreCategory> _categories = [
-    _ExploreCategory('All', 'âœ¦'),
+    _ExploreCategory('All', '✦'),
     _ExploreCategory('Trainers', '🏋️'),
     _ExploreCategory('Workouts', '💪'),
     _ExploreCategory('Nutrition', '🥗'),
@@ -173,7 +208,6 @@ class ExplorePageState extends State<ExplorePage> {
     _ExploreCategory('Tips', '💡'),
   ];
 
-  // Trending trainers - separate from content grid
   static final List<Map<String, dynamic>> _trendingTrainers = [
     {
       'name': 'Ahmed D.',
@@ -224,7 +258,7 @@ class ExplorePageState extends State<ExplorePage> {
       'category': 'Workouts',
       'isReel': true,
       'featured': true,
-      'span': 2, // takes 2 columns in the grid
+      'span': 2,
     },
     {
       'type': 'photo',
@@ -289,7 +323,7 @@ class ExplorePageState extends State<ExplorePage> {
     },
     {
       'type': 'photo',
-      'title': 'Elite Trainer - Cairo',
+      'title': 'Elite Trainer — Cairo',
       'author': 'Coach Ali',
       'authorHue': 10,
       'likes': '1.5K',
@@ -339,51 +373,107 @@ class ExplorePageState extends State<ExplorePage> {
   ];
 
   List<Map<String, dynamic>> get _filtered => _mockItems.where((i) {
-        final matchQ = _query.isEmpty ||
-            i['title']
-                .toString()
-                .toLowerCase()
-                .contains(_query.toLowerCase()) ||
-            i['author'].toString().toLowerCase().contains(_query.toLowerCase());
-        final matchC =
-            _selectedCategory == 'All' || i['category'] == _selectedCategory;
-        return matchQ && matchC;
+        return _selectedCategory == 'All' ||
+            i['category'] == _selectedCategory;
       }).toList();
 
   List<Map<String, dynamic>> get _featured =>
       _mockItems.where((i) => i['featured'] == true).toList();
 
-  bool get _showDefault => _query.isEmpty && _selectedCategory == 'All';
+  bool get _showDefault => _selectedCategory == 'All';
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        // -- Search bar --------------------------------------------------
+        // ── Search bar ─────────────────────────────────────────────────
         const SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
             child: GlobalSearchBar(),
           ),
         ),
 
-        // -- Trending Trainers (only when no filter) ----------------------
+        // ── Category chips ─────────────────────────────────────────────
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 42,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: _categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final cat = _categories[i];
+                final isSelected = _selectedCategory == cat.label;
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _selectedCategory = cat.label);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppTheme.brand
+                          : AppTheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppTheme.brand
+                            : AppTheme.divider,
+                      ),
+                    ),
+                    child: Text(
+                      '${cat.emoji}  ${cat.label}',
+                      style: TextStyle(
+                        color: isSelected
+                            ? AppTheme.bg
+                            : AppTheme.textSecondary,
+                        fontSize: 13,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+        // ── Trending Trainers ──────────────────────────────────────────
         if (_showDefault) ...[
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 14, 20, 10),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Trending Trainers',
-                      style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold)),
-                  Text('See All',
-                      style: TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 13)),
+                  Text(
+                    'Trending Trainers',
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                  Text(
+                    'See All',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -402,18 +492,23 @@ class ExplorePageState extends State<ExplorePage> {
               ),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 18)),
         ],
 
-        // -- Featured banner carousel (only when no filter) ---------------
+        // ── Featured banner carousel ───────────────────────────────────
         if (_showDefault && _featured.isNotEmpty) ...[
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 18, 20, 10),
-              child: Text('Featured',
-                  style: TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: Text(
+                'Featured',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none,
+                ),
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -432,19 +527,22 @@ class ExplorePageState extends State<ExplorePage> {
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 18, 20, 10),
-              child: Text('For You',
-                  style: TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
+              child: Text(
+                'For You',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none,
+                ),
+              ),
             ),
           ),
         ],
 
-        // -- Content grid -------------------------------------------------
-        // Uses a custom 3-column layout where 'span:2' items take 2 cols.
+        // ── Content grid ───────────────────────────────────────────────
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(4, 0, 4, 100),
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 108),
           sliver: _filtered.isEmpty
               ? SliverToBoxAdapter(
                   child: TnTEmptyState(
@@ -468,7 +566,9 @@ class _ExploreCategory {
   const _ExploreCategory(this.label, this.emoji);
 }
 
-// -- Trending Trainer Card ----------------------------------------------------
+// =============================================================================
+// TRENDING TRAINER CARD
+// =============================================================================
 class _TrendingTrainerCard extends StatelessWidget {
   final Map<String, dynamic> trainer;
   const _TrendingTrainerCard({required this.trainer});
@@ -494,10 +594,12 @@ class _TrendingTrainerCard extends StatelessWidget {
       onTap: () {
         if (trainer['object'] != null) {
           Navigator.push(
-              context,
-              AppRoutes.noTransitionRoute(
-                  trainer_public.TrainerPublicProfileScreen(
-                      trainer: trainer['object'])));
+            context,
+            AppRoutes.noTransitionRoute(
+              trainer_public.TrainerPublicProfileScreen(
+                  trainer: trainer['object']),
+            ),
+          );
         } else {
           AppUtils.showToast(
               context, '${trainer['name']}\'s profile coming soon');
@@ -506,55 +608,80 @@ class _TrendingTrainerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: accentColor.withValues(alpha: 0.25),
-              child: Text(initials,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: accentColor.withValues(alpha: 0.25),
+                child: Text(
+                  initials,
                   style: TextStyle(
-                      color: accentColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14)),
-            ),
-            const Spacer(),
-            if (trainer['verified'] == true)
-              Icon(Icons.verified_rounded, color: accentColor, size: 16),
-          ]),
+                    color: accentColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              if (trainer['verified'] == true)
+                Icon(Icons.verified_rounded, color: accentColor, size: 16),
+            ],
+          ),
           const SizedBox(height: 10),
-          Text(trainer['name'],
-              style: const TextStyle(
+          Text(
+            trainer['name'],
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              decoration: TextDecoration.none,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            trainer['specialty'],
+            style: TextStyle(color: accentColor, fontSize: 10),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              const Icon(CupertinoIcons.star_fill,
+                  color: Color(0xFFFFD700), size: 11),
+              const SizedBox(width: 3),
+              Text(
+                trainer['rating'],
+                style: const TextStyle(
                   color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 2),
-          Text(trainer['specialty'],
-              style: TextStyle(color: accentColor, fontSize: 10),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-          const Spacer(),
-          Row(children: [
-            const Icon(CupertinoIcons.star_fill,
-                color: Color(0xFFFFD700), size: 11),
-            const SizedBox(width: 3),
-            Text(trainer['rating'],
+                  fontSize: 11,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                trainer['followers'],
                 style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11)),
-            const Spacer(),
-            Text(trainer['followers'],
-                style: const TextStyle(
-                    color: AppTheme.textSecondary, fontSize: 10)),
-          ]),
+                  color: AppTheme.textSecondary,
+                  fontSize: 10,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-// -- Featured Card ------------------------------------------------------------
+// =============================================================================
+// FEATURED CARD
+// =============================================================================
 class _FeaturedCard extends StatelessWidget {
   final Map<String, dynamic> item;
   const _FeaturedCard({required this.item});
@@ -567,7 +694,7 @@ class _FeaturedCard extends StatelessWidget {
     return TnTPressable(
       onTap: () {
         AppUtils.showToast(
-            context, '${item['title']} - ${context.l10n.detailComingSoon}');
+            context, '${item['title']} — ${context.l10n.detailComingSoon}');
       },
       haptic: TnTHaptic.light,
       child: ClipRRect(
@@ -575,100 +702,129 @@ class _FeaturedCard extends StatelessWidget {
         child: Container(
           width: 250,
           color: color,
-          child: Stack(children: [
-            // Gradient overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
+          child: Stack(
+            children: [
+              // Gradient overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                      Colors.black.withValues(alpha: 0.85),
-                      Colors.transparent
-                    ])),
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.85),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            // Content
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
+              // Content
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(item['title'],
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        item['title'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 4),
-                      Row(children: [
-                        Text('by ${item['author']}',
+                      Row(
+                        children: [
+                          Text(
+                            'by ${item['author']}',
                             style: const TextStyle(
-                                color: Colors.white70, fontSize: 11)),
-                        const Spacer(),
-                        const Icon(CupertinoIcons.heart_fill,
-                            color: Colors.white60, size: 11),
-                        const SizedBox(width: 3),
-                        Text(item['likes'],
+                              color: Colors.white70,
+                              fontSize: 11,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                          const Spacer(),
+                          const Icon(CupertinoIcons.heart_fill,
+                              color: Colors.white60, size: 11),
+                          const SizedBox(width: 3),
+                          Text(
+                            item['likes'],
                             style: const TextStyle(
-                                color: Colors.white60, fontSize: 11)),
-                      ]),
-                    ]),
+                              color: Colors.white60,
+                              fontSize: 11,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            // Play icon for reels
-            if (item['isReel'] == true)
-              const Positioned(
+              // Play icon
+              if (item['isReel'] == true)
+                const Positioned(
                   top: 12,
                   right: 12,
                   child: Icon(CupertinoIcons.play_circle_fill,
-                      color: Colors.white, size: 24)),
-            // Featured badge
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
+                      color: Colors.white, size: 24),
+                ),
+              // Featured badge
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8)),
-                child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(CupertinoIcons.star_fill,
-                      color: Color(0xFFFFD700), size: 10),
-                  SizedBox(width: 4),
-                  Text('Featured',
-                      style: TextStyle(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.star_fill,
+                          color: Color(0xFFFFD700), size: 10),
+                      SizedBox(width: 4),
+                      Text(
+                        'Featured',
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 10,
-                          fontWeight: FontWeight.bold)),
-                ]),
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// -- Explore Grid - mixed-span layout -----------------------------------------
-// Renders a 3-column grid where items with span==2 occupy the left 2 columns
-// and span==1 items fill the remaining column. Falls back to a uniform 3-col
-// layout when filtering is active, since span hints only apply to "For You".
+// =============================================================================
+// EXPLORE GRID — mixed-span layout
+// =============================================================================
 class _ExploreGrid extends StatelessWidget {
   final List<Map<String, dynamic>> items;
   const _ExploreGrid({required this.items});
 
   @override
   Widget build(BuildContext context) {
-    // Build rows: pair a span-2 with a span-1, or use three span-1 items.
     const double gap = 2.0;
     final rows = <Widget>[];
     int i = 0;
@@ -676,12 +832,12 @@ class _ExploreGrid extends StatelessWidget {
       final item = items[i];
       final span = item['span'] as int? ?? 1;
       if (span == 2 && i + 1 < items.length) {
-        // Wide cell left, narrow cell right
         rows.add(Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-                flex: 2, child: _ExploreCell(item: item, aspectRatio: 0.85)),
+                flex: 2,
+                child: _ExploreCell(item: item, aspectRatio: 0.85)),
             const SizedBox(width: gap),
             Expanded(
                 flex: 1,
@@ -691,7 +847,6 @@ class _ExploreGrid extends StatelessWidget {
         rows.add(const SizedBox(height: gap));
         i += 2;
       } else {
-        // Three narrow cells
         final a = items[i];
         final b = i + 1 < items.length ? items[i + 1] : null;
         final c = i + 2 < items.length ? items[i + 2] : null;
@@ -730,112 +885,142 @@ class _ExploreCell extends StatelessWidget {
         HSLColor.fromAHSL(1, (item['imgHue'] as int).toDouble(), 0.55, 0.25)
             .toColor();
     final authorColor = HSLColor.fromAHSL(
-            1,
-            (item['authorHue'] as int? ?? item['imgHue'] as int).toDouble(),
-            0.65,
-            0.60)
-        .toColor();
+      1,
+      (item['authorHue'] as int? ?? item['imgHue'] as int).toDouble(),
+      0.65,
+      0.60,
+    ).toColor();
 
     return TnTPressable(
       onTap: () {
         AppUtils.showToast(
-            context, '${item['title']} - ${context.l10n.detailComingSoon}');
+            context, '${item['title']} — ${context.l10n.detailComingSoon}');
       },
       haptic: TnTHaptic.light,
       child: AspectRatio(
         aspectRatio: aspectRatio,
         child: Container(
           color: color,
-          child: Stack(fit: StackFit.expand, children: [
-            // Gradient overlay for readability
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Gradient overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                      Colors.black.withValues(alpha: 0.80),
-                      Colors.transparent
-                    ])),
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.80),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
 
-            // Bottom info
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(7),
-                child: Column(
+              // Bottom info
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(7),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Likes
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(CupertinoIcons.heart_fill,
-                            color: Colors.white70, size: 10),
-                        const SizedBox(width: 2),
-                        Text(item['likes'],
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(CupertinoIcons.heart_fill,
+                              color: Colors.white70, size: 10),
+                          const SizedBox(width: 2),
+                          Text(
+                            item['likes'],
                             style: const TextStyle(
-                                color: Colors.white70, fontSize: 9)),
-                      ]),
+                              color: Colors.white70,
+                              fontSize: 9,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 3),
-                      Text(item['title'],
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
-                      // Author with colored dot
-                      Row(children: [
-                        Container(
-                          width: 5,
-                          height: 5,
-                          decoration: BoxDecoration(
-                              color: authorColor, shape: BoxShape.circle),
+                      Text(
+                        item['title'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
                         ),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(item['author'],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                                color: authorColor, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: Text(
+                              item['author'],
                               style: const TextStyle(
-                                  color: Colors.white60, fontSize: 9),
+                                color: Colors.white60,
+                                fontSize: 9,
+                                decoration: TextDecoration.none,
+                              ),
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                        ),
-                      ]),
-                    ]),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
 
-            // Top-right: type indicator
-            if (item['isReel'] == true)
-              const Positioned(
+              // Reel indicator
+              if (item['isReel'] == true)
+                const Positioned(
                   top: 6,
                   right: 6,
                   child: Icon(CupertinoIcons.play_circle_fill,
-                      color: Colors.white, size: 16)),
+                      color: Colors.white, size: 16),
+                ),
 
-            // Article badge
-            if (item['type'] == 'article')
-              Positioned(
+              // Article badge
+              if (item['type'] == 'article')
+                Positioned(
                   top: 6,
                   right: 6,
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(
-                        color: Colors.black45,
-                        borderRadius: BorderRadius.circular(4)),
-                    child: Text(item['readTime'] ?? '',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
-                  )),
-          ]),
+                      color: Colors.black45,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      item['readTime'] ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

@@ -63,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     if (mounted) {
+      appState.setRole(role);
       context.go('/dashboard/$role');
     }
   }
@@ -2295,6 +2296,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               HapticFeedback.lightImpact();
                               return;
                             }
+                            appState.setRole(isTrainer ? 'Trainer' : 'Trainee');
                             appState.setMeasurementUnit(
                                 useMetric ? 'metric' : 'imperial');
                             appState.setWeightUnit(
@@ -3067,3 +3069,4 @@ class ForgotPasswordScreen extends StatelessWidget {
     );
   }
 }
+// adjust the credentials properly and prevent the phone number field to write the tbc '...' and force it to write the whole prefixes.
