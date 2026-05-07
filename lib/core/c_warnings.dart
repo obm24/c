@@ -22,6 +22,7 @@ class StandardFormWarningBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor =
         isValid ? AppTheme.cardGreen : AppTheme.error;
+    final trailing = this.trailing;
 
     return AppErrorShakeSubtle(
       enabled: !isValid,
@@ -75,12 +76,15 @@ class StandardFormWarningBanner extends StatelessWidget {
                     height: 1.4,
                     fontFamily: 'Bai Jamjuree',
                   ),
-                  child: Text(message),
+                  child: Text(
+                    message,
+                    softWrap: true,
+                  ),
                 ),
               ),
               if (trailing != null) ...[
                 const SizedBox(width: 8),
-                trailing!,
+                trailing,
               ],
             ],
           ),

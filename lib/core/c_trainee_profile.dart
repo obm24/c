@@ -84,8 +84,9 @@ class TraineeTrainingExperienceData {
       minYears: 0,
       maxYears: 0,
       label: '0 Years',
-      color: Color(0xFF94A3B8),
-      description: 'No consistent structured training yet.',
+      color: AppTheme.textSecondary,
+      description:
+          'No consistent structured personal training yet.',
     ),
     TrainingExperienceOption(
       level: ExperienceLevel.oneToTwoYears,
@@ -93,9 +94,9 @@ class TraineeTrainingExperienceData {
       minYears: 1,
       maxYears: 2,
       label: '1-2 Years',
-      color: Color(0xFF38BDF8),
+      color: AppTheme.cardBlue,
       description:
-          'Beginner/early foundation, learning consistency, basic form, and basic routines.',
+          'Early foundation with basic exercise familiarity and developing consistency.',
     ),
     TrainingExperienceOption(
       level: ExperienceLevel.threeToFiveYears,
@@ -103,9 +104,9 @@ class TraineeTrainingExperienceData {
       minYears: 3,
       maxYears: 5,
       label: '3-5 Years',
-      color: Color(0xFF34D399),
+      color: AppTheme.cardGreen,
       description:
-          'Intermediate, familiar with structured training, progressive overload, and multiple exercise types.',
+          'Consistent intermediate training with structured routines and progression.',
     ),
     TrainingExperienceOption(
       level: ExperienceLevel.sixToNineYears,
@@ -113,19 +114,19 @@ class TraineeTrainingExperienceData {
       minYears: 6,
       maxYears: 9,
       label: '6-9 Years',
-      color: Color(0xFFF59E0B),
+      color: AppTheme.cardYellow,
       description:
-          'Advanced recreational trainee, long-term consistency and strong body awareness.',
+          'Advanced recreational training with long-term consistency and body awareness.',
     ),
     TrainingExperienceOption(
       level: ExperienceLevel.tenPlusYears,
       years: 10,
       minYears: 10,
       maxYears: null,
-      label: '+10 Years',
-      color: Color(0xFFC084FC),
+      label: '10+ Years',
+      color: AppTheme.cardPurple,
       description:
-          'Highly experienced trainee with extensive long-term training exposure.',
+          'Highly experienced training history across many years or training phases.',
     ),
   ];
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'animations/anim_motion.dart';
 import 'c_constants.dart';
@@ -172,6 +173,179 @@ class TnTAppear extends StatelessWidget {
       enabled: enabled,
       child: child,
     );
+  }
+}
+
+// =============================================================================
+// PREMIUM SELECTION BUTTON
+// =============================================================================
+class PremiumSelectionButton extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool selected;
+  final bool enabled;
+  final IconData? leadingIcon;
+  final VoidCallback? onTap;
+  final VoidCallback? onHelpTap;
+  final String? helpTooltip;
+  final BorderRadius borderRadius;
+  final EdgeInsetsGeometry padding;
+  final double minHeight;
+  final double fontSize;
+
+  const PremiumSelectionButton({
+    super.key,
+    required this.label,
+    this.color = AppTheme.brand,
+    this.selected = true,
+    this.enabled = true,
+    this.leadingIcon,
+    this.onTap,
+    this.onHelpTap,
+    this.helpTooltip,
+    this.borderRadius = const BorderRadius.all(
+      Radius.circular(AppConstants.kDefaultBorderRadius),
+    ),
+    this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 9),
+    this.minHeight = 36,
+    this.fontSize = 14,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = leadingIcon;
+    final helpAction = onHelpTap;
+    final tooltip = helpTooltip?.trim();
+    final foreground =
+        selected ? color : AppTheme.textPrimary.withValues(alpha: 0.92);
+    final borderColor = selected
+        ? color.withValues(alpha: 0.48)
+        : AppTheme.textSecondary.withValues(alpha: 0.44);
+    final background = selected
+        ? color.withValues(alpha: 0.12)
+        : AppTheme.surface.withValues(alpha: 0.82);
+    final minLabelFontSize = fontSize <= 9 ? fontSize : 9.0;
+
+    final button = AppSelectionMotion(
+      selected: selected,
+      selectedScale: 1.01,
+      child: AnimatedContainer(
+        duration: AppDurations.fast,
+        curve: AppCurves.entrance,
+        constraints: BoxConstraints(minHeight: minHeight),
+        padding: padding,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: borderRadius,
+          border: Border.all(color: borderColor, width: 1.4),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+            if (selected)
+              BoxShadow(
+                color: color.withValues(alpha: 0.10),
+                blurRadius: 10,
+                offset: const Offset(0, 0),
+              ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: foreground, size: 16),
+              const SizedBox(width: 8),
+            ],
+            Flexible(
+              fit: FlexFit.loose,
+              child: AutoSizeText(
+                label,
+                maxLines: 2,
+                minFontSize: minLabelFontSize,
+                stepGranularity: 0.5,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
+                  height: 1.15,
+                ),
+              ),
+            ),
+            if (helpAction != null) ...[
+              const SizedBox(width: 10),
+              _SelectionHelpButton(
+                color: foreground,
+                tooltip: tooltip,
+                onTap: helpAction,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    if (onTap == null || !enabled) return button;
+    return TnTPressable(
+      onTap: onTap,
+      enabled: enabled,
+      pressedScale: 0.96,
+      borderRadius: borderRadius,
+      child: button,
+    );
+  }
+}
+
+class _SelectionHelpButton extends StatelessWidget {
+  final Color color;
+  final String? tooltip;
+  final VoidCallback onTap;
+
+  const _SelectionHelpButton({
+    required this.color,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final button = TnTPressable(
+      onTap: onTap,
+      haptic: TnTHaptic.light,
+      pressedScale: 0.92,
+      borderRadius: BorderRadius.circular(99),
+      child: Container(
+        width: 22,
+        height: 22,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: color.withValues(alpha: 0.42),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          '?',
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+
+    final text = tooltip;
+    if (text == null || text.isEmpty) return button;
+    return Tooltip(message: text, child: button);
   }
 }
 

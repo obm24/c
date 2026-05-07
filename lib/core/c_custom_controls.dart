@@ -2473,12 +2473,14 @@ class GroupedMultiSelectDialog extends StatefulWidget {
   final String title;
   final List<GoalCategory> categories;
   final List<String> initialSelections;
+  final Color selectionColor;
 
   const GroupedMultiSelectDialog({
     super.key,
     required this.title,
     required this.categories,
     required this.initialSelections,
+    this.selectionColor = AppTheme.brand,
   });
 
   @override
@@ -2539,11 +2541,61 @@ class _GroupedMultiSelectDialogState extends State<GroupedMultiSelectDialog> {
                       ),
                       ...category.items.map((item) {
                         final isSelected = _selections.contains(item.title);
-                        return Column(
-                          children: [
-                            InkWell(
+                        void showDescription() {
+                          AppMotion.showPremiumDialog<void>(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              backgroundColor: AppTheme.surface,
+                              titlePadding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      AppConstants.kDefaultBorderRadius)),
+                              title: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Text(item.title,
+                                        style: const TextStyle(
+                                            color: AppTheme.brand,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: AppConstants
+                                                .kDefaultTitleFontSize)),
+                                  ),
+                                  const Divider(
+                                      color: AppTheme.divider, height: 1),
+                                ],
+                              ),
+                              content: Text(item.description,
+                                  style: const TextStyle(
+                                      color: AppTheme.textPrimary,
+                                      fontSize: AppConstants
+                                          .kDefaultSubtitleFontSize,
+                                      height: 1.5)),
+                              actions: [
+                                TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context),
+                                    child: Text(context.l10n.close,
+                                        style: const TextStyle(
+                                            color: AppTheme.brand,
+                                            fontWeight: FontWeight.bold)))
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: PremiumSelectionButton(
+                              label: item.title,
+                              color: widget.selectionColor,
+                              selected: isSelected,
                               onTap: () {
-                                HapticFeedback.selectionClick();
                                 setState(() {
                                   if (isSelected) {
                                     _selections.remove(item.title);
@@ -2552,98 +2604,15 @@ class _GroupedMultiSelectDialogState extends State<GroupedMultiSelectDialog> {
                                   }
                                 });
                               },
-                              child: Container(
-                                color: isSelected
-                                    ? AppTheme.brand
-                                    : Colors.transparent,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 15),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(item.title,
-                                          style: TextStyle(
-                                              color: isSelected
-                                                  ? AppTheme
-                                                      .confirmationButtonText
-                                                  : AppTheme.textPrimary,
-                                              fontSize: AppConstants
-                                                  .kDefaultSubtitleFontSize,
-                                              fontWeight: isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        AppMotion.showPremiumDialog<void>(
-                                          context: context,
-                                          builder: (_) => AlertDialog(
-                                            backgroundColor: AppTheme.surface,
-                                            titlePadding: EdgeInsets.zero,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius
-                                                    .circular(AppConstants
-                                                        .kDefaultBorderRadius)),
-                                            title: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(20),
-                                                  child: Text(item.title,
-                                                      style: const TextStyle(
-                                                          color: AppTheme.brand,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: AppConstants
-                                                              .kDefaultTitleFontSize)),
-                                                ),
-                                                const Divider(
-                                                    color: AppTheme.divider,
-                                                    height: 1),
-                                              ],
-                                            ),
-                                            content: Text(item.description,
-                                                style: const TextStyle(
-                                                    color: AppTheme.textPrimary,
-                                                    fontSize: AppConstants
-                                                        .kDefaultSubtitleFontSize,
-                                                    height: 1.5)),
-                                            actions: [
-                                              TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                  child: Text(
-                                                      context.l10n.close,
-                                                      style: const TextStyle(
-                                                          color: AppTheme.brand,
-                                                          fontWeight:
-                                                              FontWeight.bold)))
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 15),
-                                        child: Icon(
-                                          Icons.help_outline_rounded,
-                                          color: isSelected
-                                              ? AppTheme.confirmationButtonText
-                                              : AppTheme.brand,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              onHelpTap: showDescription,
+                              helpTooltip: context.l10n.description,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 12),
+                              minHeight: 46,
+                              fontSize:
+                                  AppConstants.kDefaultSubtitleFontSize,
                             ),
-                            const Divider(color: AppTheme.divider, height: 1),
-                          ],
+                          ),
                         );
                       }),
                     ],

@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -13,19 +15,53 @@ import 'repositories/exercise_repository.dart';
 // Adjust path depending on your code generation/l10n setup
 import 'l10n/app_localizations.dart';
 
-import 'features/dashboard_trainee_screen.dart' as trainee_dashboard;
-import 'features/dashboard_trainer_screen.dart' as trainer_dashboard;
+import 'features/dashboard_screen.dart';
 import 'features/f_auth_screen.dart';
 import 'features/trainer_programmes_screen.dart';
 import 'models/m_programmes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _useHighestAndroidRefreshRate();
   AppErrorWidgetBuilder.install();
   final exerciseRepository = await ExerciseRepository.loadFromAssetBundle(
     rootBundle,
   );
   runApp(TnTApp(exerciseRepository: exerciseRepository));
+}
+
+Future<void> _useHighestAndroidRefreshRate() async {
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+
+  try {
+    final modes = await FlutterDisplayMode.supported;
+    final displayModes =
+        modes.where((mode) => mode.refreshRate > 0).toList(growable: false);
+    if (displayModes.isEmpty) return;
+
+    var preferredMode = displayModes.first;
+    for (final mode in displayModes.skip(1)) {
+      if (_isBetterDisplayMode(mode, preferredMode)) {
+        preferredMode = mode;
+      }
+    }
+
+    await FlutterDisplayMode.setPreferredMode(preferredMode);
+  } on PlatformException {
+    return;
+  } on MissingPluginException {
+    return;
+  }
+}
+
+bool _isBetterDisplayMode(DisplayMode candidate, DisplayMode current) {
+  if (candidate.refreshRate != current.refreshRate) {
+    return candidate.refreshRate > current.refreshRate;
+  }
+
+  final candidatePixels = candidate.width * candidate.height;
+  final currentPixels = current.width * current.height;
+  return candidatePixels > currentPixels;
 }
 
 class TnTApp extends StatelessWidget {
@@ -115,7 +151,7 @@ class TnTApp extends StatelessWidget {
   }
 }
 
-class _DashboardRoute extends StatelessWidget {
+class _DashboardRoute extends StatefulWidget {
   final String role;
 
   const _DashboardRoute({
@@ -123,12 +159,40 @@ class _DashboardRoute extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final normalizedRole = role.trim().toLowerCase();
-    if (normalizedRole == 'trainee') {
-      return const trainee_dashboard.TraineeWorkoutPage();
+  State<_DashboardRoute> createState() => _DashboardRouteState();
+}
+
+class _DashboardRouteState extends State<_DashboardRoute> {
+  String get _normalizedRole {
+    final normalizedRole = widget.role.trim().toLowerCase();
+    return normalizedRole == 'trainee' ? 'Trainee' : 'Trainer';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _syncRole();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DashboardRoute oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.role != widget.role) {
+      _syncRole();
     }
-    return const trainer_dashboard.TrainerWorkoutPage();
+  }
+
+  void _syncRole() {
+    final nextRole = _normalizedRole;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || appState.currentRole == nextRole) return;
+      appState.setRole(nextRole);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DashboardScreen(role: _normalizedRole);
   }
 }
 
@@ -165,7 +229,7 @@ class _TrainingPlanBuilderRoute extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            initialProgramme == null ? message : initialProgramme!.name,
+            initialProgramme?.name ?? message,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppTheme.textPrimary,

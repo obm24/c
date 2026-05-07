@@ -75,96 +75,69 @@ class _MessagesDashboardScreenState extends State<MessagesDashboardScreen> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: Scaffold(
-        backgroundColor: AppTheme.bg,
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: AppTheme.bg,
-          automaticallyImplyLeading: false,
-          title: const Text(
-            'Messages',
-            style: TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          actions: [
-            // Compose new message button
-            BlocBuilder<MessagesBloc, MessagesState>(
-              builder: (ctx, state) => IconButton(
-                icon: const Icon(CupertinoIcons.pencil_outline,
-                    color: AppTheme.brand),
-                onPressed: () =>
-                    AppUtils.showToast(ctx, 'New message — coming soon'),
-              ),
-            ),
-          ],
-        ),
-        body: BlocBuilder<MessagesBloc, MessagesState>(
-          builder: (ctx, state) {
-            if (state is MessagesLoading) {
-              return const AppAnimatedSwitcher(
-                child: _LoadingShimmer(key: ValueKey('messages-loading')),
-              );
-            }
-            if (state is MessagesError) {
-              return AppAnimatedSwitcher(
-                child: Center(
-                  key: const ValueKey('messages-error'),
-                  child: Text(state.message,
-                      style: const TextStyle(color: AppTheme.textSecondary)),
-                ),
-              );
-            }
-            if (state is! MessagesLoaded) return const SizedBox.shrink();
-
+      child: BlocBuilder<MessagesBloc, MessagesState>(
+        builder: (ctx, state) {
+          if (state is MessagesLoading) {
+            return const AppAnimatedSwitcher(
+              child: _LoadingShimmer(key: ValueKey('messages-loading')),
+            );
+          }
+          if (state is MessagesError) {
             return AppAnimatedSwitcher(
-              child: Column(
-                key: const ValueKey('messages-loaded'),
-                children: [
-                  // ── Search bar ──────────────────────────────────────────
-                  _SearchBar(
-                    controller: _searchCtrl,
-                    focusNode: _searchFocus,
-                  ),
-
-                  // ── Role-legend chips ───────────────────────────────────
-                  _RoleLegendRow(),
-
-                  // ── Conversation list ───────────────────────────────────
-                  Expanded(
-                    child: state.displayedConversations.isEmpty
-                        ? _EmptyState(isSearching: state.isSearching)
-                        : ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-                            itemCount: state.displayedConversations.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 8),
-                            itemBuilder: (_, i) {
-                              final conv = state.displayedConversations[i];
-                              final tile = ChatListTile(
-                                conversation: conv,
-                                currentUser: state.currentUser,
-                                onTap: () =>
-                                    _openChat(ctx, conv, state.currentUser),
-                                onLongPress: () => _showConvOptions(ctx, conv),
-                              );
-                              if (i >= 12) return tile;
-                              return AppFadeSlideTransition(
-                                delay: Duration(milliseconds: i * 18),
-                                duration: AppDurations.standard,
-                                child: tile,
-                              );
-                            },
-                          ),
-                  ),
-                ],
+              child: Center(
+                key: const ValueKey('messages-error'),
+                child: Text(state.message,
+                    style: const TextStyle(color: AppTheme.textSecondary)),
               ),
             );
-          },
-        ),
+          }
+          if (state is! MessagesLoaded) return const SizedBox.shrink();
+
+          return AppAnimatedSwitcher(
+            child: Column(
+              key: const ValueKey('messages-loaded'),
+              children: [
+                // ── Search bar ──────────────────────────────────────────
+                _SearchBar(
+                  controller: _searchCtrl,
+                  focusNode: _searchFocus,
+                ),
+
+                // ── Role-legend chips ───────────────────────────────────
+                _RoleLegendRow(),
+
+                // ── Conversation list ───────────────────────────────────
+                Expanded(
+                  child: state.displayedConversations.isEmpty
+                      ? _EmptyState(isSearching: state.isSearching)
+                      : ListView.separated(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                          itemCount: state.displayedConversations.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (_, i) {
+                            final conv = state.displayedConversations[i];
+                            final tile = ChatListTile(
+                              conversation: conv,
+                              currentUser: state.currentUser,
+                              onTap: () =>
+                                  _openChat(ctx, conv, state.currentUser),
+                              onLongPress: () => _showConvOptions(ctx, conv),
+                            );
+                            if (i >= 12) return tile;
+                            return AppFadeSlideTransition(
+                              delay: Duration(milliseconds: i * 18),
+                              duration: AppDurations.standard,
+                              child: tile,
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

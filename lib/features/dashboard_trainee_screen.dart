@@ -151,7 +151,7 @@ class _TodayProgressCard extends StatelessWidget {
 
     return TnTPremiumCard(
       padding: const EdgeInsets.all(20),
-      radius: 24,
+      radius: AppConstants.kDefaultBorderRadius,
       accentColor: AppTheme.cardGreen,
       child: Row(
         children: [
@@ -166,8 +166,8 @@ class _TodayProgressCard extends StatelessWidget {
                   value: progress,
                   strokeWidth: 7,
                   backgroundColor: AppTheme.divider,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppTheme.cardGreen),
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(AppTheme.cardGreen),
                   strokeCap: StrokeCap.round,
                 ),
                 const Center(
@@ -306,7 +306,7 @@ class _MiniStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return TnTPremiumCard(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      radius: 18,
+      radius: AppConstants.kDefaultBorderRadius,
       accentColor: color,
       child: Column(
         children: [
@@ -351,7 +351,7 @@ class _MyCoachCard extends StatelessWidget {
       pressedScale: 0.975,
       child: TnTPremiumCard(
         padding: const EdgeInsets.all(18),
-        radius: 22,
+        radius: AppConstants.kDefaultBorderRadius,
         accentColor: accentColor,
         child: Row(
           children: [
@@ -556,7 +556,7 @@ class _SessionTile extends StatelessWidget {
       pressedScale: 0.975,
       child: TnTPremiumCard(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        radius: 18,
+        radius: AppConstants.kDefaultBorderRadius,
         accentColor: color,
         child: Row(
           children: [
@@ -605,8 +605,7 @@ class _SessionTile extends StatelessWidget {
               ),
             ),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(9),
@@ -654,7 +653,7 @@ class _WorkoutCard extends StatelessWidget {
       pressedScale: 0.975,
       child: TnTPremiumCard(
         padding: const EdgeInsets.all(18),
-        radius: 20,
+        radius: AppConstants.kDefaultBorderRadius,
         accentColor: color,
         child: Row(
           children: [
@@ -745,7 +744,7 @@ class TrainingScheduleScreen extends StatelessWidget {
       height: 140,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppConstants.kDefaultBorderRadius),
       ),
       child: Stack(
         children: [
@@ -812,8 +811,8 @@ class TrainingScheduleScreen extends StatelessWidget {
         children: [
           _card('UPPER BODY', 'Chest, Back & Arms', 'Monday / Thursday',
               AppTheme.cardPurple, Icons.fitness_center),
-          _card('LOWER BODY', 'Quads, Hamstrings & Calves',
-              'Tuesday / Friday', const Color(0xFFC6F432), Icons.directions_run),
+          _card('LOWER BODY', 'Quads, Hamstrings & Calves', 'Tuesday / Friday',
+              const Color(0xFFC6F432), Icons.directions_run),
           _card('FULL BODY', 'Core & Stability', 'Wednesday',
               const Color(0xFF32F4D6), Icons.accessibility_new),
         ],
@@ -835,7 +834,7 @@ class DietProgrammeScreen extends StatelessWidget {
       height: 140,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppConstants.kDefaultBorderRadius),
       ),
       child: Stack(
         children: [
@@ -911,12 +910,11 @@ class DietProgrammeScreen extends StatelessWidget {
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
                 color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(
-                    AppConstants.kDefaultBorderRadius),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.kDefaultBorderRadius),
                 border: Border.all(color: AppTheme.divider),
               ),
               child: Row(
@@ -967,15 +965,20 @@ class DietProgrammeScreen extends StatelessWidget {
             ),
           ),
 
-          _card('BREAKFAST', 'High Protein & Complex Carbs',
-              'Everyday · 7:00 - 8:00 AM', AppTheme.cardYellow,
+          _card(
+              'BREAKFAST',
+              'High Protein & Complex Carbs',
+              'Everyday · 7:00 - 8:00 AM',
+              AppTheme.cardYellow,
               Icons.breakfast_dining),
-          _card('LUNCH', 'Balanced Meal with Lean Meat',
-              'Everyday · 12:30 - 1:30 PM', AppTheme.cardPink,
+          _card(
+              'LUNCH',
+              'Balanced Meal with Lean Meat',
+              'Everyday · 12:30 - 1:30 PM',
+              AppTheme.cardPink,
               Icons.lunch_dining),
-          _card('DINNER', 'Low Carb with Greens',
-              'Everyday · 7:00 - 8:00 PM', AppTheme.cardBlue,
-              Icons.dinner_dining),
+          _card('DINNER', 'Low Carb with Greens', 'Everyday · 7:00 - 8:00 PM',
+              AppTheme.cardBlue, Icons.dinner_dining),
         ],
       ),
     );

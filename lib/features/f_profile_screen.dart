@@ -14,6 +14,7 @@ import '../core/animations/anim_motion.dart';
 import '../core/c_phone_validator.dart';
 import '../core/c_warnings.dart';
 import '../core/c_trainee_profile.dart';
+import '../core/c_visual_effects.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 // =============================================================================
@@ -646,7 +647,9 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
 
   void _openMedicalMultiSelect(
       String title, String type, List<String> options, List<String> current,
-      {bool hasDesc = false, Map<String, String>? descriptions}) {
+      {bool hasDesc = false,
+      Map<String, String>? descriptions,
+      Color chipColor = AppTheme.brand}) {
     List<String> tmp = List.from(current);
     AppMotion.showPremiumDialog<void>(
       context: context,
@@ -679,123 +682,81 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                           itemBuilder: (_, i) {
                             final item = options[i];
                             final sel = tmp.contains(item);
-                            return Column(children: [
-                              InkWell(
-                                onTap: () {
-                                  HapticFeedback.selectionClick();
-                                  setM(() {
-                                    sel ? tmp.remove(item) : tmp.add(item);
-                                  });
-                                },
-                                child: Container(
-                                  color:
-                                      sel ? AppTheme.brand : Colors.transparent,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 15),
-                                  child: Row(children: [
-                                    Expanded(
-                                        child: Text(item,
-                                            style: TextStyle(
-                                                color: sel
-                                                    ? AppTheme
-                                                        .confirmationButtonText
-                                                    : AppTheme.textPrimary,
+                            final description = descriptions?[item] ??
+                                context.l10n.descriptionNotAvailable;
+                            void showDescription() {
+                              AppMotion.showPremiumDialog<void>(
+                                  context: ctx,
+                                  builder: (_) => AlertDialog(
+                                        backgroundColor: AppTheme.surface,
+                                        titlePadding: EdgeInsets.zero,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants
+                                                    .kDefaultBorderRadius)),
+                                        title: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(20),
+                                                  child: Text(item,
+                                                      style: const TextStyle(
+                                                          color: AppTheme.brand,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: AppConstants
+                                                              .kDefaultTitleFontSize))),
+                                              const Divider(
+                                                  color: AppTheme.divider,
+                                                  height: 1),
+                                            ]),
+                                        content: Text(description,
+                                            style: const TextStyle(
+                                                color: AppTheme.textPrimary,
                                                 fontSize: AppConstants
                                                     .kDefaultSubtitleFontSize,
-                                                fontWeight: sel
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal))),
-                                    if (hasDesc)
-                                      GestureDetector(
-                                        onTap: () {
-                                          HapticFeedback.lightImpact();
-                                          AppMotion.showPremiumDialog<void>(
-                                              context: ctx,
-                                              builder: (_) => AlertDialog(
-                                                    backgroundColor:
-                                                        AppTheme.surface,
-                                                    titlePadding:
-                                                        EdgeInsets.zero,
-                                                    shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(AppConstants
-                                                                .kDefaultBorderRadius)),
-                                                    title: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(20),
-                                                              child: Text(item,
-                                                                  style: const TextStyle(
-                                                                      color: AppTheme
-                                                                          .brand,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      fontSize:
-                                                                          AppConstants
-                                                                              .kDefaultTitleFontSize))),
-                                                          const Divider(
-                                                              color: AppTheme
-                                                                  .divider,
-                                                              height: 1),
-                                                        ]),
-                                                    content: Text(
-                                                        descriptions != null &&
-                                                                descriptions
-                                                                    .containsKey(
-                                                                        item)
-                                                            ? descriptions[
-                                                                item]!
-                                                            : context.l10n
-                                                                .descriptionNotAvailable,
-                                                        style: const TextStyle(
-                                                            color: AppTheme
-                                                                .textPrimary,
-                                                            fontSize: AppConstants
-                                                                .kDefaultSubtitleFontSize,
-                                                            height: 1.5)),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () {
-                                                            HapticFeedback
-                                                                .lightImpact();
-                                                            Navigator.pop(ctx);
-                                                          },
-                                                          child: Text(
-                                                              context
-                                                                  .l10n.close,
-                                                              style: const TextStyle(
-                                                                  color: AppTheme
-                                                                      .brand,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold)))
-                                                    ],
-                                                  ));
-                                        },
-                                        child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 15),
-                                            child: Icon(
-                                                CupertinoIcons.question_circle,
-                                                color: sel
-                                                    ? AppTheme
-                                                        .confirmationButtonText
-                                                    : AppTheme.brand,
-                                                size: 20)),
-                                      ),
-                                  ]),
+                                                height: 1.5)),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                HapticFeedback.lightImpact();
+                                                Navigator.pop(ctx);
+                                              },
+                                              child: Text(context.l10n.close,
+                                                  style: const TextStyle(
+                                                      color: AppTheme.brand,
+                                                      fontWeight:
+                                                          FontWeight.bold)))
+                                        ],
+                                      ));
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: PremiumSelectionButton(
+                                  label: item,
+                                  color: chipColor,
+                                  selected: sel,
+                                  onTap: () {
+                                    setM(() {
+                                      sel ? tmp.remove(item) : tmp.add(item);
+                                    });
+                                  },
+                                  onHelpTap: hasDesc ? showDescription : null,
+                                  helpTooltip: context.l10n.description,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18, vertical: 12),
+                                  minHeight: 46,
+                                  fontSize: AppConstants
+                                      .kDefaultSubtitleFontSize,
                                 ),
                               ),
-                              const Divider(color: AppTheme.divider, height: 1),
-                            ]);
+                            );
                           },
                         ),
                       ),
@@ -1183,6 +1144,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                   title: label,
                   categories: categories,
                   initialSelections: current,
+                  selectionColor: chipColor,
                 ),
               );
               if (results != null) {
@@ -1197,7 +1159,9 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
               }
             } else {
               _openMedicalMultiSelect(label, type, options, current,
-                  hasDesc: hasDesc, descriptions: descriptions);
+                  hasDesc: hasDesc,
+                  descriptions: descriptions,
+                  chipColor: chipColor);
             }
           },
           child: Container(
@@ -1217,20 +1181,16 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                               fontSize: AppConstants.kDefaultSubtitleFontSize))
                       : Wrap(
                           spacing: 6,
-                          runSpacing: 6,
-                          children: current
-                              .map((item) => Container(
+                           runSpacing: 6,
+                           children: current
+                              .map((item) => PremiumSelectionButton(
+                                    label: item,
+                                    color: chipColor,
+                                    selected: true,
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                        color: chipColor,
-                                        borderRadius: BorderRadius.circular(
-                                            AppConstants.kDefaultBorderRadius)),
-                                    child: Text(item,
-                                        style: const TextStyle(
-                                            color: AppTheme.bg,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13)),
+                                        horizontal: 18, vertical: 8),
+                                    minHeight: 34,
+                                    fontSize: 13,
                                   ))
                               .toList())),
               const Icon(Icons.arrow_drop_down, color: AppTheme.textSecondary),
@@ -1360,7 +1320,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                         fontSize: AppConstants.kDefaultTitleFontSize,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 15),
-                _buildMedicalSelector('Current Goals', 'goals',
+                _buildMedicalSelector(context.l10n.trainingGoals, 'goals',
                     MedicalData.goals, appState.currentGoals,
                     hasDesc: true, descriptions: localDesc),
                 TrainingExperienceSelector(
@@ -1371,7 +1331,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                   },
                 ),
                 _buildMedicalSelector(
-                  'Preferred Diet',
+                  context.l10n.preferredDiet,
                   'preferred_diets',
                   const [],
                   _preferredDiets,
@@ -1392,7 +1352,8 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                         .toList(),
                     appState.currentInjuries,
                     hasDesc: true,
-                    descriptions: localDesc),
+                    descriptions: localDesc,
+                    chipColor: AppTheme.error),
                 _buildMedicalSelector(
                     context.l10n.pastInjuries,
                     'past',
@@ -1401,10 +1362,13 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                         .toList(),
                     appState.pastInjuries,
                     hasDesc: true,
-                    descriptions: localDesc),
+                    descriptions: localDesc,
+                    chipColor: AppTheme.cardYellow),
                 _buildMedicalSelector(context.l10n.medicalConditions, 'medical',
                     MedicalData.commonConditions, appState.medicalConditions,
-                    hasDesc: true, descriptions: localDesc),
+                    hasDesc: true,
+                    descriptions: localDesc,
+                    chipColor: AppTheme.cardBlue),
               ],
 
               if (isTrainer) ...[
@@ -1415,7 +1379,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                         fontSize: AppConstants.kDefaultTitleFontSize,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 15),
-                _buildMedicalSelector('Specialties', 'trainer_specialties',
+                _buildMedicalSelector(context.l10n.specialities, 'trainer_specialties',
                     MedicalData.trainerSpecialties, _trainerSpecialties,
                     hasDesc: true, descriptions: localDesc),
 

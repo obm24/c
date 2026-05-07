@@ -82,10 +82,12 @@ class AppMotion {
     return PageRouteBuilder<T>(
       settings: settings,
       fullscreenDialog: fullscreenDialog,
-      transitionDuration: AppDurations.screen,
+      transitionDuration:
+          fullscreenDialog ? AppDurations.modal : AppDurations.screen,
       reverseTransitionDuration: AppDurations.standard,
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: screenTransitions,
+      transitionsBuilder:
+          fullscreenDialog ? fadeTransitions : screenTransitions,
     );
   }
 
@@ -95,15 +97,48 @@ class AppMotion {
     String? name,
     Object? arguments,
     String? restorationId,
+    bool fullscreenDialog = false,
   }) {
     return CustomTransitionPage<T>(
       key: key,
       name: name,
       arguments: arguments,
       restorationId: restorationId,
-      transitionDuration: AppDurations.screen,
+      fullscreenDialog: fullscreenDialog,
+      transitionDuration:
+          fullscreenDialog ? AppDurations.modal : AppDurations.screen,
       reverseTransitionDuration: AppDurations.standard,
-      transitionsBuilder: screenTransitions,
+      transitionsBuilder:
+          fullscreenDialog ? fadeTransitions : screenTransitions,
+      child: child,
+    );
+  }
+
+  static CustomTransitionPage<T> fadeGoRouterPage<T>({
+    required LocalKey key,
+    required Widget child,
+    String? name,
+    Object? arguments,
+    String? restorationId,
+    bool fullscreenDialog = true,
+    bool opaque = true,
+    bool barrierDismissible = false,
+    Color? barrierColor,
+    String? barrierLabel,
+  }) {
+    return CustomTransitionPage<T>(
+      key: key,
+      name: name,
+      arguments: arguments,
+      restorationId: restorationId,
+      fullscreenDialog: fullscreenDialog,
+      opaque: opaque,
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      barrierLabel: barrierLabel,
+      transitionDuration: AppDurations.modal,
+      reverseTransitionDuration: AppDurations.standard,
+      transitionsBuilder: fadeTransitions,
       child: child,
     );
   }
@@ -122,15 +157,31 @@ class AppMotion {
       curve: AppCurves.entrance,
       reverseCurve: AppCurves.exit,
     );
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(curved),
+      child: child,
+    );
+  }
+
+  static Widget fadeTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (reduceMotion(context)) return child;
+
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: AppCurves.entrance,
+      reverseCurve: AppCurves.exit,
+    );
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(curved),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0.035, 0),
-          end: Offset.zero,
-        ).animate(curved),
-        child: child,
-      ),
+      child: child,
     );
   }
 
@@ -143,18 +194,7 @@ class AppMotion {
   ) {
     if (reduceMotion(context)) return child;
 
-    final curved = CurvedAnimation(
-      parent: animation,
-      curve: AppCurves.emphasized,
-      reverseCurve: AppCurves.exit,
-    );
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0, end: 1).animate(curved),
-      child: ScaleTransition(
-        scale: Tween<double>(begin: 0.975, end: 1).animate(curved),
-        child: child,
-      ),
-    );
+    return fadeTransitions(context, animation, secondaryAnimation, child);
   }
 
   // ── showPremiumDialog ─────────────────────────────────────────────────────
@@ -378,6 +418,8 @@ class AppCreamCanvasInterstitial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visibleEmblem = emblem;
+
     return AnimatedSwitcher(
       duration: AppMotion.reduceMotion(context)
           ? AppDurations.instant
@@ -393,11 +435,11 @@ class AppCreamCanvasInterstitial extends StatelessWidget {
               key: const ValueKey('cream-canvas'),
               color: canvasColor,
               alignment: Alignment.center,
-              child: emblem != null
+              child: visibleEmblem != null
                   ? AppScaleFadeTransition(
                       beginScale: 0.94,
                       duration: AppDurations.emblemReveal,
-                      child: emblem!,
+                      child: visibleEmblem,
                     )
                   : null,
             )
@@ -620,6 +662,8 @@ class AppHeroTitleReveal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final subtitleText = subtitle;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -642,7 +686,7 @@ class AppHeroTitleReveal extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        if (subtitle != null) ...[
+        if (subtitleText != null) ...[
           const SizedBox(height: 12),
           AppFadeSlideTransition(
             delay: delay +
@@ -652,7 +696,7 @@ class AppHeroTitleReveal extends StatelessWidget {
             offset: const Offset(0, 0.03),
             enabled: enabled,
             child: Text(
-              subtitle!,
+              subtitleText,
               style: subtitleStyle ??
                   const TextStyle(
                     color: Color(0xFFA0A5AA),
@@ -1267,6 +1311,7 @@ class _AppPressableState extends State<AppPressable> {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = widget.borderRadius;
     final reduced = AppMotion.reduceMotion(context);
     final motionChild = AnimatedScale(
       duration: AppMotion.duration(context, widget.duration),
@@ -1287,10 +1332,10 @@ class _AppPressableState extends State<AppPressable> {
       onTapDown: _canPress ? (_) => _setPressed(true) : null,
       onTapUp: _canPress ? (_) => _setPressed(false) : null,
       onTapCancel: _canPress ? () => _setPressed(false) : null,
-      child: widget.borderRadius == null
+      child: borderRadius == null
           ? motionChild
           : ClipRRect(
-              borderRadius: widget.borderRadius!, child: motionChild),
+              borderRadius: borderRadius, child: motionChild),
     );
   }
 }

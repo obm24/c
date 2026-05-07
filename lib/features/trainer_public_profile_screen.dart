@@ -1548,10 +1548,11 @@ class _TrainerPublicProfileScreenState extends State<TrainerPublicProfileScreen>
       style: const TextStyle(
           color: AppTheme.brand, fontSize: 17, fontWeight: FontWeight.bold));
 
-  Widget _specialtyChip(String label) => TnTChip(
+  Widget _specialtyChip(String label) => PremiumSelectionButton(
         label: label,
-        icon: Icons.bolt,
+        leadingIcon: Icons.bolt,
         color: AppTheme.brand,
+        selected: true,
       );
 
   Widget _credentialTile(String c) => Padding(

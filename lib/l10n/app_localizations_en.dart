@@ -101,10 +101,66 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please enter a valid mobile number matching your country\'s required format and network prefix.';
 
   @override
+  String get phoneDialCodeRequiredWarning =>
+      'Select a dial code, then enter your mobile number.';
+
+  @override
+  String get phoneUnknownCountry => 'This country';
+
+  @override
+  String phoneDigitsExact(String count) {
+    return '$count digits';
+  }
+
+  @override
+  String phoneDigitsRange(String min, String max) {
+    return '$min-$max digits';
+  }
+
+  @override
+  String get phoneDigitsRequired => 'the required digits';
+
+  @override
+  String phoneAfterCallingCode(String callingCode) {
+    return ' after $callingCode';
+  }
+
+  @override
+  String phonePrefixRequirement(String prefixes) {
+    return ' and start with $prefixes';
+  }
+
+  @override
+  String phoneCurrentDigits(String actual, String target) {
+    return 'Current digits: $actual/$target';
+  }
+
+  @override
+  String phoneMobileValidationWarning(
+    String country,
+    String digitPart,
+    String after,
+    String prefixPart,
+    String currentDigits,
+  ) {
+    return '$country mobile numbers must contain $digitPart$after$prefixPart.\n$currentDigits';
+  }
+
+  @override
+  String get listOr => 'or';
+
+  @override
   String get dateOfBirth => 'Date of Birth';
 
   @override
-  String get ageError => 'Must be 16 years old or older.';
+  String get ageError => 'You must be at least 16 years old to register.';
+
+  @override
+  String get dateOfBirthRequired => 'Please select your date of birth.';
+
+  @override
+  String get minimumAgeRegistrationWarning =>
+      'You must be at least 16 years old to register.';
 
   @override
   String get yearsOld => 'years';
@@ -141,11 +197,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingExperienceSelected => 'Training experience selected.';
 
   @override
+  String get trainingExperienceHelpTooltip =>
+      'Explain training experience levels.';
+
+  @override
   String get trainingExperienceDialogTitle => 'Training Experience';
 
   @override
   String get trainingExperienceDialogIntro =>
-      'This is personal physical training experience, not professional coaching.';
+      'Select the option that best reflects your own consistent, structured physical training as a trainee. Count time spent following planned strength, conditioning, sport, mobility, or fitness routines. Do not count professional coaching experience, casual activity without structure, or long breaks as active training time.';
 
   @override
   String get experienceLevelZeroYears => '0 Years';
@@ -160,27 +220,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get experienceLevelSixToNineYears => '6\u20139 Years';
 
   @override
-  String get experienceLevelTenPlusYears => '+10 Years';
+  String get experienceLevelTenPlusYears => '10+ Years';
 
   @override
   String get experienceLevelZeroYearsDescription =>
-      'No consistent structured training yet.';
+      'Choose this if you have not yet trained consistently with a planned routine, or if your activity has mostly been occasional, informal, or shorter than a few continuous months.';
 
   @override
   String get experienceLevelOneToTwoYearsDescription =>
-      'Beginner/early foundation, learning consistency, basic form, and basic routines.';
+      'Choose this if you have built a basic routine and understand common exercises, but you are still developing consistency, technique, recovery habits, and confidence with progression.';
 
   @override
   String get experienceLevelThreeToFiveYearsDescription =>
-      'Intermediate, familiar with structured training, progressive overload, and multiple exercise types.';
+      'Choose this if you have trained consistently across multiple phases or goals, can follow structured programmes, and understand basic progression, exercise selection, and form standards.';
 
   @override
   String get experienceLevelSixToNineYearsDescription =>
-      'Advanced recreational trainee, long-term consistency and strong body awareness.';
+      'Choose this if training has been a stable part of your lifestyle for several years, with strong body awareness, exposure to different training methods, and the ability to manage intensity and recovery.';
 
   @override
   String get experienceLevelTenPlusYearsDescription =>
-      'Highly experienced trainee with extensive long-term training exposure.';
+      'Choose this if you have a long-term training history across many seasons, programmes, or life phases, and your experience gives you a clear understanding of your capabilities, limitations, and preferences.';
 
   @override
   String get selectMeasurementUnitsBeforeHeight =>
@@ -452,6 +512,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get medicalConditions => 'Medical Conditions';
+
+  @override
+  String get dietaryApproach => 'Dietary Approach';
+
+  @override
+  String get healthAndMedical => 'Health & Medical';
+
+  @override
+  String get noneReported => 'None reported';
+
+  @override
+  String get flexibleNoRestrictions => 'Flexible / No Restrictions';
 
   @override
   String get accountCreatedSuccess => 'Account created successfully!';
@@ -880,10 +952,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addCredential => 'Add Credential';
 
   @override
+  String get addAnotherCertificateFromOrganisation =>
+      'Add another certificate from this organisation';
+
+  @override
   String get credentialRequired => 'At least one credential is required.';
 
   @override
   String get saveAllCredentials => 'Save all credentials before submitting.';
+
+  @override
+  String get removeCredentialConfirmation =>
+      'Are you sure you want to remove this credential?';
+
+  @override
+  String get certificate => 'Certificate';
 
   @override
   String get certificateId => 'Certificate ID';

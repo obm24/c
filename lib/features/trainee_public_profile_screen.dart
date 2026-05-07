@@ -386,7 +386,11 @@ class _TraineePublicProfileScreenState
         child: Divider(color: AppTheme.divider, height: 1),
       );
 
-  Widget _buildChipList(List<String> items, Color color) {
+  Widget _buildChipList(
+    BuildContext context,
+    List<String> items,
+    Color color,
+  ) {
     if (items.isEmpty) {
       return TnTPremiumCard(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -397,7 +401,7 @@ class _TraineePublicProfileScreenState
                 color: AppTheme.textSecondary.withValues(alpha: 0.5), size: 16),
             const SizedBox(width: 8),
             Text(
-              'None reported',
+              context.l10n.noneReported,
               style: TextStyle(
                   color: AppTheme.textSecondary.withValues(alpha: 0.6),
                   fontSize: 13,
@@ -411,9 +415,10 @@ class _TraineePublicProfileScreenState
       spacing: 8,
       runSpacing: 8,
       children: items
-          .map((item) => Container(
-                margin: const EdgeInsets.only(right: 0),
-                child: TnTChip(label: item, color: color),
+          .map((item) => PremiumSelectionButton(
+                label: item,
+                color: color,
+                selected: true,
               ))
           .toList(),
     );
@@ -930,6 +935,14 @@ class _TraineePublicProfileScreenState
             .whereType<String>()
             .where((diet) => TraineeDietData.allLabels.contains(diet))
             .toList();
+    final dietSummary = (trainee['diet'] as String?)?.trim();
+    final dietItems = preferredDiets.isNotEmpty
+        ? preferredDiets
+        : <String>[
+            dietSummary != null && dietSummary.isNotEmpty
+                ? dietSummary
+                : context.l10n.flexibleNoRestrictions,
+          ];
 
     final dob = trainee['dob'] as DateTime?;
     final int? age = dob != null ? _computeAge(dob) : null;
@@ -1127,52 +1140,28 @@ class _TraineePublicProfileScreenState
                         },
                       ),
                       _sectionDivider(),
-                      _sectionHeader('Training Goals',
+                      _sectionHeader(context.l10n.trainingGoals,
                           icon: Icons.flag_outlined),
-                      _buildChipList(goals, AppTheme.brand),
+                      _buildChipList(context, goals, AppTheme.brand),
                       _sectionDivider(),
-                      _sectionHeader('Dietary Approach',
+                      _sectionHeader(context.l10n.dietaryApproach,
                           icon: Icons.restaurant_outlined),
-                      if (preferredDiets.isNotEmpty)
-                        _buildChipList(preferredDiets, AppTheme.cardGreen)
-                      else
-                        TnTPremiumCard(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(14),
-                          accentColor: AppTheme.cardGreen,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.restaurant,
-                                  color: AppTheme.textSecondary, size: 18),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  trainee['diet'] ??
-                                      'Flexible / No Restrictions',
-                                  style: const TextStyle(
-                                      color: AppTheme.textPrimary,
-                                      fontSize: 14,
-                                      height: 1.4),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      _buildChipList(context, dietItems, AppTheme.cardGreen),
                       _sectionDivider(),
-                      _sectionHeader('Health & Medical',
+                      _sectionHeader(context.l10n.healthAndMedical,
                           icon: CupertinoIcons.heart),
-                      _subLabel('Current Injuries'),
+                      _subLabel(context.l10n.currentInjuries),
                       const SizedBox(height: 10),
-                      _buildChipList(currentInjuries, AppTheme.error),
+                      _buildChipList(context, currentInjuries, AppTheme.error),
                       const SizedBox(height: 20),
-                      _subLabel('Past Injuries'),
+                      _subLabel(context.l10n.pastInjuries),
                       const SizedBox(height: 10),
-                      _buildChipList(pastInjuries, AppTheme.cardYellow),
+                      _buildChipList(context, pastInjuries, AppTheme.cardYellow),
                       const SizedBox(height: 20),
-                      _subLabel('Medical Conditions'),
+                      _subLabel(context.l10n.medicalConditions),
                       const SizedBox(height: 10),
-                      _buildChipList(medicalConditions, AppTheme.cardBlue),
+                      _buildChipList(
+                          context, medicalConditions, AppTheme.cardBlue),
                       const SizedBox(height: 4),
                     ],
                   ),

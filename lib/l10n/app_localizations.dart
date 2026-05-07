@@ -274,6 +274,72 @@ abstract class AppLocalizations {
   /// **'Please enter a valid mobile number matching your country\'s required format and network prefix.'**
   String get invalidMobileCountryWarning;
 
+  /// No description provided for @phoneDialCodeRequiredWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a dial code, then enter your mobile number.'**
+  String get phoneDialCodeRequiredWarning;
+
+  /// No description provided for @phoneUnknownCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'This country'**
+  String get phoneUnknownCountry;
+
+  /// No description provided for @phoneDigitsExact.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} digits'**
+  String phoneDigitsExact(String count);
+
+  /// No description provided for @phoneDigitsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}-{max} digits'**
+  String phoneDigitsRange(String min, String max);
+
+  /// No description provided for @phoneDigitsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'the required digits'**
+  String get phoneDigitsRequired;
+
+  /// No description provided for @phoneAfterCallingCode.
+  ///
+  /// In en, this message translates to:
+  /// **' after {callingCode}'**
+  String phoneAfterCallingCode(String callingCode);
+
+  /// No description provided for @phonePrefixRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **' and start with {prefixes}'**
+  String phonePrefixRequirement(String prefixes);
+
+  /// No description provided for @phoneCurrentDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Current digits: {actual}/{target}'**
+  String phoneCurrentDigits(String actual, String target);
+
+  /// No description provided for @phoneMobileValidationWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} mobile numbers must contain {digitPart}{after}{prefixPart}.\n{currentDigits}'**
+  String phoneMobileValidationWarning(
+    String country,
+    String digitPart,
+    String after,
+    String prefixPart,
+    String currentDigits,
+  );
+
+  /// No description provided for @listOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get listOr;
+
   /// No description provided for @dateOfBirth.
   ///
   /// In en, this message translates to:
@@ -283,8 +349,20 @@ abstract class AppLocalizations {
   /// No description provided for @ageError.
   ///
   /// In en, this message translates to:
-  /// **'Must be 16 years old or older.'**
+  /// **'You must be at least 16 years old to register.'**
   String get ageError;
+
+  /// No description provided for @dateOfBirthRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your date of birth.'**
+  String get dateOfBirthRequired;
+
+  /// No description provided for @minimumAgeRegistrationWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 16 years old to register.'**
+  String get minimumAgeRegistrationWarning;
 
   /// No description provided for @yearsOld.
   ///
@@ -352,6 +430,12 @@ abstract class AppLocalizations {
   /// **'Training experience selected.'**
   String get trainingExperienceSelected;
 
+  /// No description provided for @trainingExperienceHelpTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain training experience levels.'**
+  String get trainingExperienceHelpTooltip;
+
   /// No description provided for @trainingExperienceDialogTitle.
   ///
   /// In en, this message translates to:
@@ -361,7 +445,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingExperienceDialogIntro.
   ///
   /// In en, this message translates to:
-  /// **'This is personal physical training experience, not professional coaching.'**
+  /// **'Select the option that best reflects your own consistent, structured physical training as a trainee. Count time spent following planned strength, conditioning, sport, mobility, or fitness routines. Do not count professional coaching experience, casual activity without structure, or long breaks as active training time.'**
   String get trainingExperienceDialogIntro;
 
   /// No description provided for @experienceLevelZeroYears.
@@ -391,37 +475,37 @@ abstract class AppLocalizations {
   /// No description provided for @experienceLevelTenPlusYears.
   ///
   /// In en, this message translates to:
-  /// **'+10 Years'**
+  /// **'10+ Years'**
   String get experienceLevelTenPlusYears;
 
   /// No description provided for @experienceLevelZeroYearsDescription.
   ///
   /// In en, this message translates to:
-  /// **'No consistent structured training yet.'**
+  /// **'Choose this if you have not yet trained consistently with a planned routine, or if your activity has mostly been occasional, informal, or shorter than a few continuous months.'**
   String get experienceLevelZeroYearsDescription;
 
   /// No description provided for @experienceLevelOneToTwoYearsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Beginner/early foundation, learning consistency, basic form, and basic routines.'**
+  /// **'Choose this if you have built a basic routine and understand common exercises, but you are still developing consistency, technique, recovery habits, and confidence with progression.'**
   String get experienceLevelOneToTwoYearsDescription;
 
   /// No description provided for @experienceLevelThreeToFiveYearsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Intermediate, familiar with structured training, progressive overload, and multiple exercise types.'**
+  /// **'Choose this if you have trained consistently across multiple phases or goals, can follow structured programmes, and understand basic progression, exercise selection, and form standards.'**
   String get experienceLevelThreeToFiveYearsDescription;
 
   /// No description provided for @experienceLevelSixToNineYearsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Advanced recreational trainee, long-term consistency and strong body awareness.'**
+  /// **'Choose this if training has been a stable part of your lifestyle for several years, with strong body awareness, exposure to different training methods, and the ability to manage intensity and recovery.'**
   String get experienceLevelSixToNineYearsDescription;
 
   /// No description provided for @experienceLevelTenPlusYearsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Highly experienced trainee with extensive long-term training exposure.'**
+  /// **'Choose this if you have a long-term training history across many seasons, programmes, or life phases, and your experience gives you a clear understanding of your capabilities, limitations, and preferences.'**
   String get experienceLevelTenPlusYearsDescription;
 
   /// No description provided for @selectMeasurementUnitsBeforeHeight.
@@ -921,6 +1005,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Medical Conditions'**
   String get medicalConditions;
+
+  /// No description provided for @dietaryApproach.
+  ///
+  /// In en, this message translates to:
+  /// **'Dietary Approach'**
+  String get dietaryApproach;
+
+  /// No description provided for @healthAndMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Medical'**
+  String get healthAndMedical;
+
+  /// No description provided for @noneReported.
+  ///
+  /// In en, this message translates to:
+  /// **'None reported'**
+  String get noneReported;
+
+  /// No description provided for @flexibleNoRestrictions.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible / No Restrictions'**
+  String get flexibleNoRestrictions;
 
   /// No description provided for @accountCreatedSuccess.
   ///
@@ -1750,6 +1858,12 @@ abstract class AppLocalizations {
   /// **'Add Credential'**
   String get addCredential;
 
+  /// No description provided for @addAnotherCertificateFromOrganisation.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another certificate from this organisation'**
+  String get addAnotherCertificateFromOrganisation;
+
   /// No description provided for @credentialRequired.
   ///
   /// In en, this message translates to:
@@ -1761,6 +1875,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save all credentials before submitting.'**
   String get saveAllCredentials;
+
+  /// No description provided for @removeCredentialConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this credential?'**
+  String get removeCredentialConfirmation;
+
+  /// No description provided for @certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate'**
+  String get certificate;
 
   /// No description provided for @certificateId.
   ///

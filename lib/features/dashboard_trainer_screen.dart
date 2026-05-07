@@ -201,7 +201,7 @@ class _QuickStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return TnTPremiumCard(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      radius: 20,
+      radius: AppConstants.kDefaultBorderRadius,
       accentColor: color,
       child: Column(
         children: [
@@ -275,8 +275,7 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TnTPressable(
-      onTap: () =>
-          AppUtils.showToast(context, '${action.label} — coming soon'),
+      onTap: () => AppUtils.showToast(context, '${action.label} — coming soon'),
       pressedScale: 0.93,
       child: Column(
         children: [
@@ -285,7 +284,8 @@ class _QuickActionButton extends StatelessWidget {
             height: 54,
             decoration: BoxDecoration(
               color: action.color.withValues(alpha: 0.13),
-              borderRadius: BorderRadius.circular(18),
+              borderRadius:
+                  BorderRadius.circular(AppConstants.kDefaultBorderRadius),
               border: Border.all(
                 color: action.color.withValues(alpha: 0.25),
                 width: 1,
@@ -380,7 +380,7 @@ class _RecentActivitySection extends StatelessWidget {
         const SizedBox(height: 14),
         TnTPremiumCard(
           padding: EdgeInsets.zero,
-          radius: 20,
+          radius: AppConstants.kDefaultBorderRadius,
           child: Column(
             children: _activities.asMap().entries.map((entry) {
               final i = entry.key;
@@ -397,8 +397,8 @@ class _RecentActivitySection extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: (a['color'] as Color)
-                                .withValues(alpha: 0.14),
+                            color:
+                                (a['color'] as Color).withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(13),
                           ),
                           child: Icon(a['icon'] as IconData,
@@ -491,9 +491,9 @@ class _TrainerDashCard extends StatelessWidget {
       onTap: d.onTap,
       pressedScale: 0.968,
       child: TnTPremiumCard(
-        height: 88,
+        height: 80,
         padding: EdgeInsets.zero,
-        radius: 22,
+        radius: AppConstants.kDefaultBorderRadius,
         accentColor: d.gradient.first,
         child: Stack(
           children: [
@@ -501,7 +501,8 @@ class _TrainerDashCard extends StatelessWidget {
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.kDefaultBorderRadius),
                   gradient: LinearGradient(
                     colors: [
                       d.gradient.first.withValues(alpha: 0.20),
@@ -542,7 +543,8 @@ class _TrainerDashCard extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(
+                          AppConstants.kDefaultBorderRadius),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.15),
                         width: 1,
