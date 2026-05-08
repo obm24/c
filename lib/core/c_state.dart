@@ -124,6 +124,7 @@ class AppState extends ChangeNotifier {
     'Arm': '36.5',
     'Forearm': '30.0',
     'Waist': '86.0',
+    'Hips': '96.0',
     'Thigh': '62.0',
     'Calf': '41.0'
   };

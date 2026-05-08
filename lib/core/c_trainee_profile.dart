@@ -1,5 +1,11 @@
+import 'dart:math' as math;
+
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:equatable/equatable.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/m_goal_model.dart';
 import '../l10n/app_localizations.dart';
@@ -8,6 +14,1308 @@ import 'animations/anim_motion.dart';
 import 'c_constants.dart';
 import 'c_ui_theme.dart';
 import 'c_warnings.dart';
+
+class BodyCircumferenceSeries extends Equatable {
+  final String key;
+  final List<String> aliases;
+  final Color color;
+  final IconData icon;
+  final String assetPath;
+  final String description;
+
+  const BodyCircumferenceSeries({
+    required this.key,
+    required this.aliases,
+    required this.color,
+    required this.icon,
+    required this.assetPath,
+    required this.description,
+  });
+
+  String localizedLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (key) {
+      case 'Neck':
+        return l10n.neck;
+      case 'Shoulder':
+        return l10n.shoulder;
+      case 'Chest':
+        return l10n.chest;
+      case 'Arms':
+        return l10n.arms;
+      case 'Forearms':
+        return l10n.forearms;
+      case 'Waist':
+        return l10n.waist;
+      case 'Hips':
+        return l10n.hips;
+      case 'Thighs':
+        return l10n.thighs;
+      case 'Legs':
+        return l10n.legs;
+      default:
+        return key;
+    }
+  }
+
+  @override
+  List<Object?> get props =>
+      [key, aliases, color, icon, assetPath, description];
+}
+
+const List<BodyCircumferenceSeries> bodyCircumferenceSeries = [
+  BodyCircumferenceSeries(
+    key: 'Neck',
+    aliases: ['Neck'],
+    color: Color(0xFF1F77B4),
+    icon: Icons.airline_seat_flat,
+    assetPath: 'assets/images/body_circumference/1_cleidomastoids.png',
+    description:
+        'Circumference of the neck at its narrowest point. Elevated neck girth can correlate with sleep apnea risk and cardiovascular markers.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Shoulder',
+    aliases: ['Shoulder', 'Shoulders'],
+    color: Color(0xFFFF7F0E),
+    icon: Icons.accessibility_new,
+    assetPath: 'assets/images/body_circumference/2_shoulders.png',
+    description:
+        'Circumference around the widest part of the shoulders. Tracks upper body development and shoulder width relative to waist for V-taper progress.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Chest',
+    aliases: ['Chest'],
+    color: Color(0xFF2CA02C),
+    icon: Icons.favorite_border,
+    assetPath: 'assets/images/body_circumference/3_chest.png',
+    description:
+        'Circumference around the fullest part of the chest. A primary hypertrophy indicator for the pectorals, lats, and upper back.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Arms',
+    aliases: ['Arms', 'Arm'],
+    color: Color(0xFFD62728),
+    icon: Icons.sports_handball_outlined,
+    assetPath: 'assets/images/body_circumference/4_arms.png',
+    description:
+        'Circumference of the upper arm, usually measured at the biceps peak. It is a classic marker of arm muscle development.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Forearms',
+    aliases: ['Forearms', 'Forearm', 'Wrist'],
+    color: Color(0xFFCB89B7),
+    icon: Icons.sports_handball_outlined,
+    assetPath: 'assets/images/body_circumference/7_forearms.png',
+    description:
+        'Circumference of the forearm at its widest point. Reflects grip strength development and lower arm hypertrophy.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Waist',
+    aliases: ['Waist'],
+    color: Color(0xFF9467BD),
+    icon: Icons.straighten,
+    assetPath: 'assets/images/body_circumference/5_waist.png',
+    description:
+        'Circumference at the narrowest torso point, typically at the navel or just above the iliac crest. It is a key health-risk indicator.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Hips',
+    aliases: ['Hips', 'Hip'],
+    color: Color(0xFF8C564B),
+    icon: Icons.directions_walk,
+    assetPath: 'assets/images/body_circumference/6_hips.png',
+    description:
+        'Circumference at the widest point of the hips and glutes. Often paired with waist measurement for waist-to-hip ratio tracking.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Thighs',
+    aliases: ['Thighs', 'Thigh'],
+    color: Color(0xFF6CE7E3),
+    icon: Icons.directions_walk,
+    assetPath: 'assets/images/body_circumference/8_thighs.png',
+    description:
+        'Circumference of the upper thigh at its widest point. Tracks quadriceps, hamstring, and adductor hypertrophy.',
+  ),
+  BodyCircumferenceSeries(
+    key: 'Legs',
+    aliases: ['Legs', 'Leg', 'Calves', 'Calf'],
+    color: Color(0xFFBCBD22),
+    icon: Icons.directions_run,
+    assetPath: 'assets/images/body_circumference/9_legs.png',
+    description:
+        'Circumference of the calf muscle at its fullest point. A useful lower-leg development marker that is often resistant to change.',
+  ),
+];
+
+BodyCircumferenceSeries? bodyCircumferenceSeriesForKey(String key) {
+  final normalizedKey = key.trim().toLowerCase();
+  for (final series in bodyCircumferenceSeries) {
+    if (series.key.toLowerCase() == normalizedKey ||
+        series.aliases.any((alias) => alias.toLowerCase() == normalizedKey)) {
+      return series;
+    }
+  }
+  return null;
+}
+
+Map<String, dynamic> normalizeBodyCircumferenceData(
+    Map<String, dynamic> rawData) {
+  final normalized = <String, dynamic>{};
+  for (final series in bodyCircumferenceSeries) {
+    for (final alias in <String>{series.key, ...series.aliases}) {
+      if (rawData.containsKey(alias)) {
+        normalized[series.key] = rawData[alias];
+        break;
+      }
+    }
+  }
+  return normalized;
+}
+
+abstract class BodyPartVisibilityEvent extends Equatable {
+  const BodyPartVisibilityEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class ToggleBodyPartVisibility extends BodyPartVisibilityEvent {
+  final String bodyPart;
+
+  const ToggleBodyPartVisibility(this.bodyPart);
+
+  @override
+  List<Object?> get props => [bodyPart];
+}
+
+class BodyPartVisibilityState extends Equatable {
+  final Set<String> availableBodyParts;
+  final Set<String> hiddenBodyParts;
+
+  const BodyPartVisibilityState({
+    required this.availableBodyParts,
+    this.hiddenBodyParts = const {},
+  });
+
+  BodyPartVisibilityState copyWith({
+    Set<String>? availableBodyParts,
+    Set<String>? hiddenBodyParts,
+  }) {
+    return BodyPartVisibilityState(
+      availableBodyParts: availableBodyParts ?? this.availableBodyParts,
+      hiddenBodyParts: hiddenBodyParts ?? this.hiddenBodyParts,
+    );
+  }
+
+  bool isVisible(String bodyPart) => !hiddenBodyParts.contains(bodyPart);
+
+  @override
+  List<Object?> get props => [
+        availableBodyParts.toList()..sort(),
+        hiddenBodyParts.toList()..sort(),
+      ];
+}
+
+class BodyPartVisibilityBloc
+    extends Bloc<BodyPartVisibilityEvent, BodyPartVisibilityState> {
+  BodyPartVisibilityBloc({
+    required Iterable<String> availableBodyParts,
+  }) : super(
+          BodyPartVisibilityState(
+            availableBodyParts: Set<String>.from(availableBodyParts),
+          ),
+        ) {
+    on<ToggleBodyPartVisibility>(_onToggleBodyPartVisibility);
+  }
+
+  void _onToggleBodyPartVisibility(
+    ToggleBodyPartVisibility event,
+    Emitter<BodyPartVisibilityState> emit,
+  ) {
+    if (!state.availableBodyParts.contains(event.bodyPart)) {
+      return;
+    }
+
+    final nextHiddenBodyParts = Set<String>.from(state.hiddenBodyParts);
+    if (nextHiddenBodyParts.contains(event.bodyPart)) {
+      nextHiddenBodyParts.remove(event.bodyPart);
+    } else {
+      nextHiddenBodyParts.add(event.bodyPart);
+    }
+
+    emit(state.copyWith(hiddenBodyParts: nextHiddenBodyParts));
+  }
+}
+
+typedef BodyCircumferenceEditCallback = void Function(
+  BuildContext context,
+  BodyCircumferenceSeries series,
+  String currentValue,
+);
+
+class BodyCircumferenceTrackerScreen extends StatefulWidget {
+  final String title;
+  final Map<String, dynamic> data;
+  final String measurementUnit;
+  final BodyCircumferenceEditCallback? onEditMeasurement;
+
+  const BodyCircumferenceTrackerScreen({
+    super.key,
+    required this.title,
+    required this.data,
+    required this.measurementUnit,
+    this.onEditMeasurement,
+  });
+
+  @override
+  State<BodyCircumferenceTrackerScreen> createState() =>
+      _BodyCircumferenceTrackerScreenState();
+}
+
+class _BodyCircumferenceTrackerScreenState
+    extends State<BodyCircumferenceTrackerScreen> {
+  static const List<String> _timelines = [
+    'Currently',
+    'Weekly',
+    'Monthly',
+    'Annually',
+  ];
+
+  late final BodyPartVisibilityBloc _bodyPartVisibilityBloc;
+  String _selectedTimeline = 'Currently';
+
+  @override
+  void initState() {
+    super.initState();
+    _bodyPartVisibilityBloc = BodyPartVisibilityBloc(
+      availableBodyParts: bodyCircumferenceSeries.map((series) => series.key),
+    );
+  }
+
+  @override
+  void dispose() {
+    _bodyPartVisibilityBloc.close();
+    super.dispose();
+  }
+
+  Map<String, dynamic> get _displayData =>
+      normalizeBodyCircumferenceData(widget.data);
+
+  List<String> _getXLabels() {
+    if (_selectedTimeline == 'Currently') return ['Now'];
+    if (_selectedTimeline == 'Weekly') {
+      return ['16 Jun', '23 Jun', '30 Jun', '07 Jul'];
+    }
+    if (_selectedTimeline == 'Monthly') {
+      return ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+    }
+    if (_selectedTimeline == 'Annually') {
+      return ['2020', '2021', '2022', '2023', '2024', '2025'];
+    }
+    return const [];
+  }
+
+  String _rawValueForSeries(BodyCircumferenceSeries series) {
+    final value = _displayData[series.key];
+    if (value != null) return value.toString();
+    return '0.0';
+  }
+
+  String _displayValueForSeries(BodyCircumferenceSeries series) {
+    final rawValue = _rawValueForSeries(series);
+    final match = RegExp(r'[0-9]+(\.[0-9]+)?').firstMatch(rawValue);
+    return match?.group(0) ?? '0.0';
+  }
+
+  double _currentValueForKey(String key) {
+    final series = bodyCircumferenceSeriesForKey(key);
+    if (series == null) return 0.0;
+    final numericValue = _displayValueForSeries(series);
+    return double.tryParse(numericValue) ?? 0.0;
+  }
+
+  List<double> _getMetricValues(String key) {
+    final baseVal = _currentValueForKey(key);
+    final pointCount = switch (_selectedTimeline) {
+      'Weekly' => 4,
+      'Monthly' => 6,
+      'Annually' => 6,
+      _ => 1,
+    };
+    if (baseVal <= 0) {
+      return List<double>.filled(pointCount, 0.01);
+    }
+
+    final isDescendingTarget = key == 'Waist';
+    final sign = isDescendingTarget ? 1.0 : -1.0;
+
+    if (_selectedTimeline == 'Weekly') {
+      return [
+        baseVal + sign * 2.5,
+        baseVal + sign * 1.8,
+        baseVal + sign * 1.0,
+        baseVal,
+      ];
+    }
+    if (_selectedTimeline == 'Monthly') {
+      return [
+        baseVal + sign * 8.0,
+        baseVal + sign * 6.0,
+        baseVal + sign * 4.0,
+        baseVal + sign * 2.0,
+        baseVal + sign * 1.0,
+        baseVal,
+      ];
+    }
+    if (_selectedTimeline == 'Annually') {
+      return [
+        baseVal + sign * 15.0,
+        baseVal + sign * 12.0,
+        baseVal + sign * 9.0,
+        baseVal + sign * 6.0,
+        baseVal + sign * 3.0,
+        baseVal,
+      ];
+    }
+    return [baseVal];
+  }
+
+  double _toLog(double value) =>
+      value > 0 ? (math.log(value) / math.ln10) : 0.0;
+
+  double _fromLog(double logValue) => math.pow(10, logValue).toDouble();
+
+  String _formatLegendValue(BodyCircumferenceSeries series) {
+    final value = _currentValueForKey(series.key);
+    if (value == 0) return '0';
+    return value.truncateToDouble() == value
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+  }
+
+  void _showDescriptionDialog(
+    BuildContext context,
+    BodyCircumferenceSeries series,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(AppConstants.kDefaultBorderRadius),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 60),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: series.color.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: _BodyPartAssetIcon(series: series, size: 25),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          series.localizedLabel(context),
+                          style: TextStyle(
+                            color: series.color,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Text(
+                          'Unit: cm / in',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: AppTheme.divider),
+              const SizedBox(height: 12),
+              Text(
+                series.description,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: AppConstants.kDefaultButtonHeightLarge,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.brand,
+                    side: const BorderSide(color: AppTheme.brand),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.kDefaultBorderRadius,
+                      ),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'Got it',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _toggleBodyPart(BuildContext context, String key) {
+    HapticFeedback.selectionClick();
+    context.read<BodyPartVisibilityBloc>().add(ToggleBodyPartVisibility(key));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _bodyPartVisibilityBloc,
+      child: Scaffold(
+        backgroundColor: AppTheme.bg,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: AppTheme.bg,
+          iconTheme: const IconThemeData(color: AppTheme.textPrimary),
+          title: Text(
+            widget.title,
+            style: const TextStyle(color: AppTheme.brand),
+          ),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Row(
+                children: _timelines.map((timeline) {
+                  final isSelected = timeline == _selectedTimeline;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _selectedTimeline = timeline);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 8,
+                        ),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppTheme.brand : AppTheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color:
+                                isSelected ? AppTheme.brand : AppTheme.divider,
+                          ),
+                        ),
+                        child: AutoSizeText(
+                          timeline,
+                          maxLines: 1,
+                          minFontSize: 9,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isSelected
+                                ? AppTheme.bg
+                                : AppTheme.textSecondary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (_selectedTimeline == 'Currently')
+              Expanded(child: _buildCurrentGrid(context))
+            else ...[
+              Expanded(child: _buildChart(context)),
+              const SizedBox(height: 10),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentGrid(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const horizontalPadding = 14.0;
+        const spacing = 10.0;
+        final availableWidth =
+            constraints.maxWidth - horizontalPadding * 2 - spacing * 2;
+        final cardWidth = math.max(86.0, availableWidth / 3);
+        final cardHeight = math.max(128.0, cardWidth / 0.82);
+
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            horizontalPadding,
+            4,
+            horizontalPadding,
+            24,
+          ),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            runAlignment: WrapAlignment.center,
+            spacing: spacing,
+            runSpacing: spacing,
+            children: bodyCircumferenceSeries.map((series) {
+              final value = _displayValueForSeries(series);
+              return SizedBox(
+                width: cardWidth,
+                height: cardHeight,
+                child: GestureDetector(
+                  onTap: widget.onEditMeasurement == null
+                      ? null
+                      : () {
+                          HapticFeedback.selectionClick();
+                          widget.onEditMeasurement!(context, series, value);
+                        },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.kDefaultBorderRadius,
+                      ),
+                      border: Border.all(color: AppTheme.divider),
+                    ),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(7, 11, 7, 10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _BodyPartAssetIcon(
+                                  series: series,
+                                  size: math.min(70, cardWidth * 0.58),
+                                ),
+                                const SizedBox(height: 8),
+                                AutoSizeText(
+                                  series.localizedLabel(context),
+                                  maxLines: 1,
+                                  minFontSize: 8,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: AppTheme.textSecondary
+                                        .withValues(alpha: 0.85),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                _MeasurementValueText(
+                                  value: value,
+                                  unit: widget.measurementUnit,
+                                  color: series.color,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          bottom: 31,
+                          child: _InfoBadge(
+                            color: series.color,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              _showDescriptionDialog(context, series);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(growable: false),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildChart(BuildContext context) {
+    final xLabels = _getXLabels();
+    if (xLabels.isEmpty) return const SizedBox.shrink();
+
+    return BlocBuilder<BodyPartVisibilityBloc, BodyPartVisibilityState>(
+      builder: (context, state) {
+        final visibleSeries = bodyCircumferenceSeries
+            .where((series) => state.isVisible(series.key))
+            .toList(growable: false);
+
+        final lineBarsData = <LineChartBarData>[];
+        double globalMinLog = double.infinity;
+        double globalMaxLog = double.negativeInfinity;
+
+        for (final series in visibleSeries) {
+          final logValues = _getMetricValues(series.key)
+              .map((value) =>
+                  _toLog(value.abs().clamp(0.01, double.infinity).toDouble()))
+              .toList(growable: false);
+
+          for (final logValue in logValues) {
+            if (logValue < globalMinLog) globalMinLog = logValue;
+            if (logValue > globalMaxLog) globalMaxLog = logValue;
+          }
+
+          final spots = logValues
+              .asMap()
+              .entries
+              .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
+              .toList(growable: false);
+
+          lineBarsData.add(
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              curveSmoothness: 0.35,
+              color: series.color,
+              barWidth: 2,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, pct, bar, idx) => FlDotCirclePainter(
+                  radius: 3.5,
+                  color: series.color,
+                  strokeWidth: 1.5,
+                  strokeColor: AppTheme.bg,
+                ),
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    series.color.withValues(alpha: 0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (globalMinLog == double.infinity) {
+          globalMinLog = 0;
+          globalMaxLog = 2;
+        }
+        final logRange = (globalMaxLog - globalMinLog)
+            .clamp(0.1, double.infinity)
+            .toDouble();
+        final minY = globalMinLog - logRange * 0.08;
+        final maxY = globalMaxLog + logRange * 0.08;
+        final xCount = xLabels.length;
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                padding: const EdgeInsets.fromLTRB(4, 16, 12, 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.kDefaultBorderRadius,
+                  ),
+                  border: Border.all(color: AppTheme.divider),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    const preferredLegendLeft = 48.0;
+                    final maxLegendWidth =
+                        math.max(140.0, constraints.maxWidth - 12);
+                    final legendWidth = math.min(330.0, maxLegendWidth);
+                    final maxLegendLeft =
+                        math.max(0.0, constraints.maxWidth - legendWidth);
+                    final desiredLegendLeft =
+                        (constraints.maxWidth - legendWidth) / 2;
+                    final legendLeft = math.min(
+                      preferredLegendLeft,
+                      desiredLegendLeft.clamp(0.0, maxLegendLeft),
+                    );
+                    final legendMaxHeight =
+                        math.max(120.0, constraints.maxHeight - 40);
+
+                    return Stack(
+                      clipBehavior: Clip.hardEdge,
+                      children: [
+                        Positioned.fill(
+                          child: lineBarsData.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    '${l10n.allSeriesHidden}\n'
+                                    '${l10n.tapBodyPartToShowSeries}',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: AppTheme.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                )
+                              : LineChart(
+                                  LineChartData(
+                                    minX: 0,
+                                    maxX: (xCount - 1).toDouble(),
+                                    minY: minY,
+                                    maxY: maxY,
+                                    gridData: FlGridData(
+                                      show: true,
+                                      drawVerticalLine: false,
+                                      horizontalInterval: logRange / 4,
+                                      getDrawingHorizontalLine: (_) => FlLine(
+                                        color: AppTheme.divider
+                                            .withValues(alpha: 0.5),
+                                        strokeWidth: 1,
+                                        dashArray: [4, 6],
+                                      ),
+                                    ),
+                                    borderData: FlBorderData(show: false),
+                                    titlesData: FlTitlesData(
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 42,
+                                          getTitlesWidget: (logValue, meta) {
+                                            final real = _fromLog(logValue);
+                                            final label = real >= 1000
+                                                ? '${(real / 1000).toStringAsFixed(1)}k'
+                                                : real >= 100
+                                                    ? real.toStringAsFixed(0)
+                                                    : real.toStringAsFixed(1);
+                                            return Text(
+                                              label,
+                                              style: const TextStyle(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      rightTitles: const AxisTitles(
+                                        sideTitles:
+                                            SideTitles(showTitles: false),
+                                      ),
+                                      topTitles: const AxisTitles(
+                                        sideTitles:
+                                            SideTitles(showTitles: false),
+                                      ),
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 32,
+                                          interval: 1,
+                                          getTitlesWidget: (value, meta) {
+                                            final index = value.toInt();
+                                            if (index < 0 || index >= xCount) {
+                                              return const SizedBox.shrink();
+                                            }
+                                            final skipEvery =
+                                                xCount > 5 ? 2 : 1;
+                                            if (xCount > 5 &&
+                                                index % skipEvery != 0) {
+                                              return const SizedBox.shrink();
+                                            }
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.only(top: 6),
+                                              child: Text(
+                                                xLabels[index],
+                                                style: const TextStyle(
+                                                  color: AppTheme.textSecondary,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    lineTouchData:
+                                        LineTouchData(enabled: false),
+                                    lineBarsData: lineBarsData,
+                                  ),
+                                ),
+                        ),
+                        if (lineBarsData.isNotEmpty)
+                          Positioned(
+                            top: 20,
+                            left: legendLeft,
+                            child: SizedBox(
+                              width: legendWidth,
+                              height: legendMaxHeight,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.topLeft,
+                                child: SizedBox(
+                                  width: legendWidth,
+                                  child: _BodyCircumferenceLegend(
+                                    series: bodyCircumferenceSeries,
+                                    unit: widget.measurementUnit,
+                                    isVisible: state.isVisible,
+                                    valueFor: _formatLegendValue,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+            _BodyPartFilterTags(
+              series: bodyCircumferenceSeries,
+              isVisible: state.isVisible,
+              onToggle: (key) => _toggleBodyPart(context, key),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MeasurementValueText extends StatelessWidget {
+  final String value;
+  final String unit;
+  final Color color;
+
+  const _MeasurementValueText({
+    required this.value,
+    required this.unit,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 24,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Flexible(
+            child: AutoSizeText(
+              value,
+              maxLines: 1,
+              minFontSize: 10,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 3),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: AutoSizeText(
+              unit,
+              maxLines: 1,
+              minFontSize: 7,
+              style: TextStyle(
+                color: color.withValues(alpha: 0.65),
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  final Color color;
+  final VoidCallback onTap;
+
+  const _InfoBadge({
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.18),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: color.withValues(alpha: 0.4),
+            width: 1,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '?',
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BodyPartAssetIcon extends StatelessWidget {
+  final BodyCircumferenceSeries series;
+  final double size;
+
+  const _BodyPartAssetIcon({
+    required this.series,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      series.assetPath,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, __, ___) => Icon(
+        series.icon,
+        color: series.color,
+        size: size * 0.72,
+      ),
+    );
+  }
+}
+
+class _BodyCircumferenceLegend extends StatelessWidget {
+  final List<BodyCircumferenceSeries> series;
+  final String unit;
+  final bool Function(String key) isVisible;
+  final String Function(BodyCircumferenceSeries series) valueFor;
+
+  const _BodyCircumferenceLegend({
+    required this.series,
+    required this.unit,
+    required this.isVisible,
+    required this.valueFor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF080A0A).withValues(alpha: 0.93),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF2A2D32), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (int index = 0; index < series.length; index++) ...[
+            if (index > 0)
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: AppTheme.divider.withValues(alpha: 0.8),
+              ),
+            _BodyCircumferenceLegendRow(
+              series: series[index],
+              unit: unit,
+              value: valueFor(series[index]),
+              visible: isVisible(series[index].key),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BodyCircumferenceLegendRow extends StatelessWidget {
+  final BodyCircumferenceSeries series;
+  final String value;
+  final String unit;
+  final bool visible;
+
+  const _BodyCircumferenceLegendRow({
+    required this.series,
+    required this.value,
+    required this.unit,
+    required this.visible,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = visible ? series.color : AppTheme.textTertiary;
+    return Opacity(
+      opacity: visible ? 1 : 0.42,
+      child: SizedBox(
+        height: 34,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 32,
+              child: Center(
+                child: _BodyPartAssetIcon(series: series, size: 27),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 6,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AutoSizeText(
+                  series.localizedLabel(context),
+                  maxLines: 1,
+                  minFontSize: 10,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 1,
+              height: double.infinity,
+              color: AppTheme.divider.withValues(alpha: 0.8),
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+            ),
+            Expanded(
+              flex: 5,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AutoSizeText(
+                  '$value $unit',
+                  maxLines: 1,
+                  minFontSize: 10,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BodyPartFilterTags extends StatelessWidget {
+  final List<BodyCircumferenceSeries> series;
+  final bool Function(String key) isVisible;
+  final ValueChanged<String> onToggle;
+
+  const _BodyPartFilterTags({
+    required this.series,
+    required this.isVisible,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const spacing = 8.0;
+          final firstRowCount = (series.length / 2).ceil();
+          final maxChipWidth =
+              (constraints.maxWidth - spacing * (firstRowCount - 1)) /
+                  firstRowCount;
+          final chipWidth = maxChipWidth.clamp(40.0, 92.0).toDouble();
+          final firstRow = series.take(firstRowCount).toList(growable: false);
+          final secondRow = series.skip(firstRowCount).toList(growable: false);
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _BodyPartFilterTagRow(
+                items: firstRow,
+                chipWidth: chipWidth,
+                spacing: spacing,
+                isVisible: isVisible,
+                onToggle: onToggle,
+              ),
+              const SizedBox(height: 8),
+              _BodyPartFilterTagRow(
+                items: secondRow,
+                chipWidth: chipWidth,
+                spacing: spacing,
+                isVisible: isVisible,
+                onToggle: onToggle,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _BodyPartFilterTagRow extends StatelessWidget {
+  final List<BodyCircumferenceSeries> items;
+  final double chipWidth;
+  final double spacing;
+  final bool Function(String key) isVisible;
+  final ValueChanged<String> onToggle;
+
+  const _BodyPartFilterTagRow({
+    required this.items,
+    required this.chipWidth,
+    required this.spacing,
+    required this.isVisible,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int index = 0; index < items.length; index++) ...[
+          if (index > 0) SizedBox(width: spacing),
+          _BodyPartFilterTag(
+            series: items[index],
+            width: chipWidth,
+            selected: isVisible(items[index].key),
+            onTap: () => onToggle(items[index].key),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _BodyPartFilterTag extends StatelessWidget {
+  final BodyCircumferenceSeries series;
+  final double width;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BodyPartFilterTag({
+    required this.series,
+    required this.width,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 160),
+        opacity: selected ? 1 : 0.45,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          width: width,
+          height: 34,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: selected
+                ? series.color.withValues(alpha: 0.11)
+                : AppTheme.surfaceLow,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected
+                  ? series.color.withValues(alpha: 0.45)
+                  : AppTheme.outlineSoft,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _BodyPartAssetIcon(series: series, size: 16),
+              const SizedBox(width: 3),
+              Flexible(
+                child: AutoSizeText(
+                  series.localizedLabel(context),
+                  maxLines: 1,
+                  minFontSize: 7,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: selected ? series.color : AppTheme.textTertiary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 enum ExperienceLevel {
   zeroYears,
@@ -85,8 +1393,7 @@ class TraineeTrainingExperienceData {
       maxYears: 0,
       label: '0 Years',
       color: AppTheme.textSecondary,
-      description:
-          'No consistent structured personal training yet.',
+      description: 'No consistent structured personal training yet.',
     ),
     TrainingExperienceOption(
       level: ExperienceLevel.oneToTwoYears,

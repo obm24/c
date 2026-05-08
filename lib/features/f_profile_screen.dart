@@ -47,11 +47,20 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
         int vB = int.parse(b.split('+').last.replaceAll(RegExp(r'[^0-9]'), ''));
         return vA.compareTo(vB);
       });
-    _phoneCtrl.addListener(() => setState(() {}));
+    _phoneCtrl.addListener(_handlePhoneChanged);
+  }
+
+  void _handlePhoneChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _phoneCtrl.removeListener(_handlePhoneChanged);
+    _currentPassCtrl.dispose();
+    _newPassCtrl.dispose();
+    _confPassCtrl.dispose();
+    _newEmailCtrl.dispose();
     _phoneCtrl.dispose();
     super.dispose();
   }
@@ -63,13 +72,14 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
       ).isValid;
 
   void _showPhoneChangeModal() {
+    final parentContext = context;
     AppMotion.showPremiumBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => BlocProvider(
+      builder: (sheetContext) => BlocProvider(
         create: (_) => PhoneValidationBloc()
           ..add(CountrySelected(
             appState.profileCountry,
@@ -78,7 +88,7 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
           ..add(PhoneNumberChanged(_phoneCtrl.text)),
         child: Padding(
           padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
               left: 24,
               right: 24,
               top: 24),
@@ -128,9 +138,10 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
                                 region: appState.profileRegion,
                                 dob: appState.profileDob,
                               );
-                              Navigator.pop(context);
+                              Navigator.pop(sheetContext);
+                              if (!mounted) return;
                               setState(() {});
-                              AppUtils.showToast(context,
+                              AppUtils.showToast(parentContext,
                                   'Phone number updated successfully!');
                             }
                           : null),
@@ -324,15 +335,16 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
   }
 
   void _showEmailChangeModal() {
+    final parentContext = context;
     AppMotion.showPremiumBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => Padding(
+      builder: (sheetContext) => Padding(
         padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
             left: 24,
             right: 24,
             top: 24),
@@ -348,7 +360,7 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
                         color: AppTheme.divider,
                         borderRadius: BorderRadius.circular(10)))),
             const SizedBox(height: 25),
-            Text(context.l10n.changeEmail,
+            Text(sheetContext.l10n.changeEmail,
                 style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 20,
@@ -362,7 +374,7 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
                   color: AppTheme.textPrimary,
                   fontSize: AppConstants.kDefaultSubtitleFontSize),
               decoration: InputDecoration(
-                labelText: context.l10n.newEmailAddress,
+                labelText: sheetContext.l10n.newEmailAddress,
                 labelStyle: const TextStyle(color: AppTheme.textSecondary),
                 floatingLabelStyle: const TextStyle(
                     color: AppTheme.brand,
@@ -381,12 +393,13 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
             ),
             const SizedBox(height: 25),
             SolidConfirmButton(
-                label: context.l10n.sendVerificationLink,
+                label: sheetContext.l10n.sendVerificationLink,
                 onPressed: () {
                   HapticFeedback.selectionClick();
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
+                  if (!mounted) return;
                   AppUtils.showToast(
-                      context, 'Verification link sent to new email!');
+                      parentContext, 'Verification link sent to new email!');
                 }),
             const SizedBox(height: 30),
           ],
@@ -396,15 +409,16 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
   }
 
   void _showPasswordChangeModal() {
+    final parentContext = context;
     AppMotion.showPremiumBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => Padding(
+      builder: (sheetContext) => Padding(
         padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
             left: 24,
             right: 24,
             top: 24),
@@ -420,7 +434,7 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
                         color: AppTheme.divider,
                         borderRadius: BorderRadius.circular(10)))),
             const SizedBox(height: 25),
-            Text(context.l10n.changePassword,
+            Text(sheetContext.l10n.changePassword,
                 style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 20,
@@ -434,12 +448,13 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
             _passField('Confirm New Password', _confPassCtrl),
             const SizedBox(height: 25),
             SolidConfirmButton(
-                label: context.l10n.updatePassword,
+                label: sheetContext.l10n.updatePassword,
                 onPressed: () {
                   HapticFeedback.selectionClick();
-                  Navigator.pop(context);
-                  AppUtils.showToast(
-                      context, context.l10n.passwordUpdatedSuccess);
+                  final message = sheetContext.l10n.passwordUpdatedSuccess;
+                  Navigator.pop(sheetContext);
+                  if (!mounted) return;
+                  AppUtils.showToast(parentContext, message);
                 }),
             const SizedBox(height: 30),
           ],
@@ -605,12 +620,18 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
       _preferredDiets = List<String>.from(appState.selectedPreferredDiets);
     }
 
-    _fNameCtrl.addListener(() => setState(() {}));
-    _lNameCtrl.addListener(() => setState(() {}));
+    _fNameCtrl.addListener(_handleNameChanged);
+    _lNameCtrl.addListener(_handleNameChanged);
+  }
+
+  void _handleNameChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _fNameCtrl.removeListener(_handleNameChanged);
+    _lNameCtrl.removeListener(_handleNameChanged);
     _fNameCtrl.dispose();
     _lNameCtrl.dispose();
     super.dispose();
@@ -640,9 +661,8 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
   Future<void> _pickProfileImage() async {
     HapticFeedback.lightImpact();
     final img = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (img != null && mounted) {
-      AppUtils.showToast(context, context.l10n.profileImageUpdated);
-    }
+    if (!mounted || img == null) return;
+    AppUtils.showToast(context, context.l10n.profileImageUpdated);
   }
 
   void _openMedicalMultiSelect(
@@ -653,15 +673,16 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
     List<String> tmp = List.from(current);
     AppMotion.showPremiumDialog<void>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setM) => Dialog(
+      builder: (dialogContext) => StatefulBuilder(
+          builder: (dialogContext, setM) => Dialog(
                 backgroundColor: AppTheme.surface,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                         AppConstants.kDefaultBorderRadius)),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(ctx).size.height * 0.8),
+                      maxHeight:
+                          MediaQuery.of(dialogContext).size.height * 0.8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -683,11 +704,11 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                             final item = options[i];
                             final sel = tmp.contains(item);
                             final description = descriptions?[item] ??
-                                context.l10n.descriptionNotAvailable;
+                                dialogContext.l10n.descriptionNotAvailable;
                             void showDescription() {
                               AppMotion.showPremiumDialog<void>(
-                                  context: ctx,
-                                  builder: (_) => AlertDialog(
+                                  context: dialogContext,
+                                  builder: (descriptionContext) => AlertDialog(
                                         backgroundColor: AppTheme.surface,
                                         titlePadding: EdgeInsets.zero,
                                         shape: RoundedRectangleBorder(
@@ -723,9 +744,11 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                                           TextButton(
                                               onPressed: () {
                                                 HapticFeedback.lightImpact();
-                                                Navigator.pop(ctx);
+                                                Navigator.pop(
+                                                    descriptionContext);
                                               },
-                                              child: Text(context.l10n.close,
+                                              child: Text(
+                                                  descriptionContext.l10n.close,
                                                   style: const TextStyle(
                                                       color: AppTheme.brand,
                                                       fontWeight:
@@ -748,12 +771,12 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                                     });
                                   },
                                   onHelpTap: hasDesc ? showDescription : null,
-                                  helpTooltip: context.l10n.description,
+                                  helpTooltip: dialogContext.l10n.description,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 18, vertical: 12),
                                   minHeight: 46,
-                                  fontSize: AppConstants
-                                      .kDefaultSubtitleFontSize,
+                                  fontSize:
+                                      AppConstants.kDefaultSubtitleFontSize,
                                 ),
                               ),
                             );
@@ -767,25 +790,29 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               SolidConfirmButton(
-                                  label: context.l10n.confirm,
+                                  label: dialogContext.l10n.confirm,
                                   height:
                                       AppConstants.kDefaultButtonHeightLarge,
                                   onPressed: () {
                                     if (type == 'trainer_specialties') {
-                                      setState(() => _trainerSpecialties = tmp);
+                                      if (mounted) {
+                                        setState(
+                                            () => _trainerSpecialties = tmp);
+                                      }
                                     } else {
                                       appState.updateMedical(type, tmp);
                                     }
-                                    Navigator.pop(ctx);
+                                    Navigator.pop(dialogContext);
                                   }),
                               const SizedBox(height: 10),
                               OutlineActionButton(
-                                  label: context.l10n.cancel,
+                                  label: dialogContext.l10n.cancel,
                                   height:
                                       AppConstants.kDefaultButtonHeightLarge,
                                   textColor: AppTheme.textPrimary,
                                   borderColor: AppTheme.textSecondary,
-                                  onPressed: () => Navigator.pop(ctx)),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext)),
                             ]),
                       ),
                     ],
@@ -825,7 +852,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                                 color: AppTheme.divider,
                                 borderRadius: BorderRadius.circular(10)))),
                     const SizedBox(height: 25),
-                    Text(context.l10n.manageCredentials,
+                    Text(ctx.l10n.manageCredentials,
                         style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 20,
@@ -835,7 +862,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                     if (_trainerCredentials.isEmpty)
                       Padding(
                           padding: EdgeInsets.all(20),
-                          child: Text(context.l10n.noCredentialsAdded,
+                          child: Text(ctx.l10n.noCredentialsAdded,
                               style: TextStyle(color: AppTheme.textSecondary),
                               textAlign: TextAlign.center))
                     else
@@ -847,13 +874,13 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                           allCredentials: _trainerCredentials,
                           onSave: (d) {
                             setM(() => _trainerCredentials[idx] = d);
-                            setState(() {});
+                            if (mounted) setState(() {});
                           },
                           onEdit: () => setM(() =>
                               _trainerCredentials[idx]['_isEditing'] = true),
                           onRemove: () {
                             setM(() => _trainerCredentials.removeAt(idx));
-                            setState(() {});
+                            if (mounted) setState(() {});
                           },
                           onCancel: () => setM(() {
                             if (_trainerCredentials[idx]['org'] == null) {
@@ -866,7 +893,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                       }),
                     const SizedBox(height: 15),
                     OutlineActionButton(
-                      label: context.l10n.addCredential,
+                      label: ctx.l10n.addCredential,
                       icon: const Icon(Icons.add, color: AppTheme.brand),
                       height: 50,
                       onPressed: () => setM(() => _trainerCredentials.add({
@@ -878,7 +905,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                     ),
                     const SizedBox(height: 30),
                     SolidConfirmButton(
-                        label: context.l10n.done,
+                        label: ctx.l10n.done,
                         onPressed: () => Navigator.pop(ctx)),
                   ],
                 ),
@@ -1147,15 +1174,14 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                   selectionColor: chipColor,
                 ),
               );
-              if (results != null) {
-                if (type == 'trainer_specialties') {
-                  setState(() => _trainerSpecialties = results);
-                } else if (type == 'preferred_diets') {
-                  setState(() => _preferredDiets = results);
-                  appState.updatePreferredDiets(results);
-                } else {
-                  appState.updateMedical(type, results);
-                }
+              if (!mounted || results == null) return;
+              if (type == 'trainer_specialties') {
+                setState(() => _trainerSpecialties = results);
+              } else if (type == 'preferred_diets') {
+                setState(() => _preferredDiets = results);
+                appState.updatePreferredDiets(results);
+              } else {
+                appState.updateMedical(type, results);
               }
             } else {
               _openMedicalMultiSelect(label, type, options, current,
@@ -1181,8 +1207,8 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                               fontSize: AppConstants.kDefaultSubtitleFontSize))
                       : Wrap(
                           spacing: 6,
-                           runSpacing: 6,
-                           children: current
+                          runSpacing: 6,
+                          children: current
                               .map((item) => PremiumSelectionButton(
                                     label: item,
                                     color: chipColor,
@@ -1379,9 +1405,13 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                         fontSize: AppConstants.kDefaultTitleFontSize,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 15),
-                _buildMedicalSelector(context.l10n.specialities, 'trainer_specialties',
-                    MedicalData.trainerSpecialties, _trainerSpecialties,
-                    hasDesc: true, descriptions: localDesc),
+                _buildMedicalSelector(
+                    context.l10n.specialities,
+                    'trainer_specialties',
+                    MedicalData.trainerSpecialties,
+                    _trainerSpecialties,
+                    hasDesc: true,
+                    descriptions: localDesc),
 
                 // Task 1: renamed to Credentials, new system
                 Text(context.l10n.credentials,
@@ -1468,11 +1498,16 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
     _selectedOrg = widget.credential['org'];
     _selectedCert = widget.credential['cert'];
     _idCtrl.text = widget.credential['certId'] ?? '';
-    _idCtrl.addListener(() => setState(() {}));
+    _idCtrl.addListener(_handleIdChanged);
+  }
+
+  void _handleIdChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _idCtrl.removeListener(_handleIdChanged);
     _idCtrl.dispose();
     super.dispose();
   }
@@ -1505,21 +1540,21 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
     final orgs = _availableOrgs;
     AppMotion.showPremiumDialog<void>(
       context: context,
-      builder: (_) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: AppTheme.surface,
         shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(AppConstants.kDefaultBorderRadius)),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.75),
+              maxHeight: MediaQuery.of(dialogContext).size.height * 0.75),
           child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
                     padding: EdgeInsets.all(20),
-                    child: Text(context.l10n.selectOrganisation,
+                    child: Text(dialogContext.l10n.selectOrganisation,
                         style: TextStyle(
                             color: AppTheme.brand,
                             fontWeight: FontWeight.bold,
@@ -1536,7 +1571,8 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
                       InkWell(
                         onTap: () {
                           HapticFeedback.selectionClick();
-                          Navigator.pop(context);
+                          Navigator.pop(dialogContext);
+                          if (!mounted) return;
                           setState(() {
                             _selectedOrg = org;
                             if (_selectedCert != null &&
@@ -1571,10 +1607,10 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
                 Padding(
                     padding: const EdgeInsets.all(16),
                     child: OutlineActionButton(
-                        label: context.l10n.cancel,
+                        label: dialogContext.l10n.cancel,
                         textColor: AppTheme.textPrimary,
                         borderColor: AppTheme.textSecondary,
-                        onPressed: () => Navigator.pop(context))),
+                        onPressed: () => Navigator.pop(dialogContext))),
               ]),
         ),
       ),
@@ -1586,21 +1622,21 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
     final certs = _availableCertsForOrg(_selectedOrg!);
     AppMotion.showPremiumDialog<void>(
       context: context,
-      builder: (_) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: AppTheme.surface,
         shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(AppConstants.kDefaultBorderRadius)),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.75),
+              maxHeight: MediaQuery.of(dialogContext).size.height * 0.75),
           child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
                     padding: EdgeInsets.all(20),
-                    child: Text(context.l10n.selectCertificate,
+                    child: Text(dialogContext.l10n.selectCertificate,
                         style: TextStyle(
                             color: AppTheme.brand,
                             fontWeight: FontWeight.bold,
@@ -1624,7 +1660,8 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
                                 InkWell(
                                   onTap: () {
                                     HapticFeedback.selectionClick();
-                                    Navigator.pop(context);
+                                    Navigator.pop(dialogContext);
+                                    if (!mounted) return;
                                     setState(() => _selectedCert = cert);
                                   },
                                   child: Container(
@@ -1656,10 +1693,10 @@ class _ProfileCredentialCardState extends State<ProfileCredentialCard> {
                 Padding(
                     padding: const EdgeInsets.all(16),
                     child: OutlineActionButton(
-                        label: context.l10n.cancel,
+                        label: dialogContext.l10n.cancel,
                         textColor: AppTheme.textPrimary,
                         borderColor: AppTheme.textSecondary,
-                        onPressed: () => Navigator.pop(context))),
+                        onPressed: () => Navigator.pop(dialogContext))),
               ]),
         ),
       ),
@@ -2160,188 +2197,29 @@ class CircumferencesScreen extends StatefulWidget {
 }
 
 class _CircumferencesScreenState extends State<CircumferencesScreen> {
-  String _tl = '1M';
-  final List<String> _timelines = ['1D', '1W', '1M', '3M', '6M', '1Y', 'All'];
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: appState,
       builder: (context, _) {
-        final mU = appState.measurementUnit == 'metric' ? 'cm' : 'in';
-        final metrics = [
-          {
-            'label': context.l10n.neck,
-            'key': 'Neck',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.shoulder,
-            'key': 'Shoulder',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.chest,
-            'key': 'Chest',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.arm,
-            'key': 'Arm',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.forearm,
-            'key': 'Forearm',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': 'Wrist',
-            'key': 'Wrist',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.waist,
-            'key': 'Waist',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.thigh,
-            'key': 'Thigh',
-            'unit': mU,
-            'isCircumference': true
-          },
-          {
-            'label': context.l10n.calf,
-            'key': 'Calf',
-            'unit': mU,
-            'isCircumference': true
-          },
-        ];
-        return Scaffold(
-          backgroundColor: AppTheme.bg,
-          appBar: AppBar(
-              elevation: 0,
-              iconTheme: const IconThemeData(color: AppTheme.textPrimary),
-              title: Text(context.l10n.circumferences,
-                  style: const TextStyle(color: AppTheme.brand))),
-          body:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            SizedBox(
-                height: 40,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  itemCount: _timelines.length,
-                  physics: const BouncingScrollPhysics(),
-                  itemBuilder: (_, i) {
-                    final t = _timelines[i];
-                    final sel = t == _tl;
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _tl = t);
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 10),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: sel ? AppTheme.brand : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color:
-                                    sel ? AppTheme.brand : AppTheme.divider)),
-                        child: Text(t,
-                            style: TextStyle(
-                                color:
-                                    sel ? AppTheme.bg : AppTheme.textSecondary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13)),
-                      ),
-                    );
-                  },
-                )),
-            const SizedBox(height: 20),
-            Expanded(
-                child: GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24)
-                  .copyWith(bottom: 24),
-              physics: const BouncingScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  childAspectRatio: 0.85),
-              itemCount: metrics.length,
-              itemBuilder: (_, i) {
-                final m = metrics[i];
-                final key = m['key'] as String;
-                final val = appState.circumferences[key] ?? '0.0';
-                final imgKey = key.toLowerCase().replaceAll(' ', '_');
-                return GestureDetector(
-                  onTap: () => _showEditStatModal(context, m, val),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: AppTheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppTheme.divider)),
-                    child: Stack(children: [
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                                child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Image.asset(
-                                        'assets/images/$imgKey.png',
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.accessibility_new,
-                                                color: AppTheme.textSecondary,
-                                                size: 40)))),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 8),
-                              decoration: const BoxDecoration(
-                                  color: AppTheme.bg,
-                                  borderRadius: BorderRadius.vertical(
-                                      bottom: Radius.circular(16))),
-                              child: Column(children: [
-                                Text(m['label'] as String,
-                                    style: const TextStyle(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 13),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                                Text('$val ${m['unit']}',
-                                    style: const TextStyle(
-                                        color: AppTheme.brand,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                              ]),
-                            ),
-                          ]),
-                      const Positioned(
-                          top: 10,
-                          right: 10,
-                          child: Icon(Icons.edit,
-                              color: AppTheme.textSecondary, size: 16)),
-                    ]),
-                  ),
-                );
+        final measurementUnit =
+            appState.measurementUnit == 'metric' ? 'cm' : 'in';
+        return BodyCircumferenceTrackerScreen(
+          title: context.l10n.circumferences,
+          data: Map<String, dynamic>.from(appState.circumferences),
+          measurementUnit: measurementUnit,
+          onEditMeasurement: (ctx, series, currentValue) {
+            _showEditStatModal(
+              ctx,
+              {
+                'label': series.localizedLabel(ctx),
+                'key': series.aliases.first,
+                'unit': measurementUnit,
+                'isCircumference': true,
               },
-            )),
-          ]),
+              currentValue,
+            );
+          },
         );
       },
     );
@@ -2371,6 +2249,7 @@ class _PlacesOfEmploymentScreenState extends State<PlacesOfEmploymentScreen> {
   ];
 
   void _openSheet({Map<String, dynamic>? existing, int? editIdx}) {
+    final parentContext = context;
     final nameCtrl = TextEditingController(text: existing?['name'] ?? '');
     final addrCtrl = TextEditingController(text: existing?['address'] ?? '');
     final cityCtrl = TextEditingController(text: existing?['city'] ?? '');
@@ -2537,10 +2416,11 @@ class _PlacesOfEmploymentScreenState extends State<PlacesOfEmploymentScreen> {
                             } else {
                               appState.addPlaceOfEmployment(place);
                             }
-                            setState(() {});
+                            if (mounted) setState(() {});
                             Navigator.pop(ctx);
+                            if (!mounted) return;
                             AppUtils.showToast(
-                                context,
+                                parentContext,
                                 editIdx != null
                                     ? 'Location updated.'
                                     : 'Location added.');
@@ -2564,6 +2444,7 @@ class _PlacesOfEmploymentScreenState extends State<PlacesOfEmploymentScreen> {
 
   void _confirmDelete(int idx) {
     HapticFeedback.lightImpact();
+    final parentContext = context;
     AppMotion.showPremiumDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -2607,9 +2488,10 @@ class _PlacesOfEmploymentScreenState extends State<PlacesOfEmploymentScreen> {
                     onPressed: () {
                       HapticFeedback.selectionClick();
                       appState.removePlaceOfEmployment(idx);
-                      setState(() {});
+                      if (mounted) setState(() {});
                       Navigator.pop(ctx);
-                      AppUtils.showToast(context, 'Location removed.');
+                      if (!mounted) return;
+                      AppUtils.showToast(parentContext, 'Location removed.');
                     }),
                 const SizedBox(height: 12),
                 SolidConfirmButton(
@@ -2710,8 +2592,9 @@ class _PlacesOfEmploymentScreenState extends State<PlacesOfEmploymentScreen> {
                             onPressed: () {
                               appState.employmentMode = 1;
                               appState.setOnlineOnly(true);
-                              setState(() {});
+                              if (mounted) setState(() {});
                               Navigator.pop(ctx);
+                              if (!mounted) return;
                               AppUtils.showToast(
                                   context, 'Switched to online-only mode.');
                             },

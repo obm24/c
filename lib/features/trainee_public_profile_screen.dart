@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:equatable/equatable.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -100,235 +99,6 @@ class BodyCompData {
       'BMR': Icons.bolt_outlined,
     };
     return m[key] ?? Icons.bar_chart;
-  }
-}
-
-class BodyCircumferenceSeries extends Equatable {
-  final String key;
-  final List<String> aliases;
-  final Color color;
-  final IconData icon;
-  final String assetPath;
-  final String description;
-
-  const BodyCircumferenceSeries({
-    required this.key,
-    required this.aliases,
-    required this.color,
-    required this.icon,
-    required this.assetPath,
-    required this.description,
-  });
-
-  String localizedLabel(BuildContext context) {
-    switch (key) {
-      case 'Neck':
-        return context.l10n.neck;
-      case 'Shoulders':
-        return context.l10n.shoulders;
-      case 'Chest':
-        return context.l10n.chest;
-      case 'Arms':
-        return context.l10n.arms;
-      case 'Forearms':
-        return context.l10n.forearms;
-      case 'Waist':
-        return context.l10n.waist;
-      case 'Hips':
-        return context.l10n.hips;
-      case 'Thighs':
-        return context.l10n.thighs;
-      case 'Calves':
-        return context.l10n.calves;
-      default:
-        return key;
-    }
-  }
-
-  @override
-  List<Object?> get props =>
-      [key, aliases, color, icon, assetPath, description];
-}
-
-const List<BodyCircumferenceSeries> _bodyCircumferenceSeries = [
-  BodyCircumferenceSeries(
-    key: 'Neck',
-    aliases: ['Neck'],
-    color: Color(0xFF1F77B4),
-    icon: Icons.airline_seat_flat,
-    assetPath: 'assets/images/body_circumference/1_cleidomastoids.png',
-    description:
-        'Circumference of the neck at its narrowest point. Elevated neck girth can correlate with sleep apnea risk and cardiovascular markers.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Shoulders',
-    aliases: ['Shoulders', 'Shoulder'],
-    color: Color(0xFFFF7F0E),
-    icon: Icons.accessibility_new,
-    assetPath: 'assets/images/body_circumference/2_shoulders.png',
-    description:
-        'Circumference around the widest part of the shoulders. Tracks upper body development and shoulder width relative to waist for V-taper progress.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Chest',
-    aliases: ['Chest'],
-    color: Color(0xFF2CA02C),
-    icon: Icons.favorite_border,
-    assetPath: 'assets/images/body_circumference/3_chest.png',
-    description:
-        'Circumference around the fullest part of the chest. A primary hypertrophy indicator for the pectorals, lats, and upper back.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Arms',
-    aliases: ['Arms', 'Arm'],
-    color: Color(0xFFD62728),
-    icon: Icons.sports_handball_outlined,
-    assetPath: 'assets/images/body_circumference/4_arms.png',
-    description:
-        'Circumference of the upper arm, usually measured at the biceps peak. It is a classic marker of arm muscle development.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Forearms',
-    aliases: ['Forearms', 'Forearm', 'Wrist'],
-    color: Color(0xFFCB89B7),
-    icon: Icons.sports_handball_outlined,
-    assetPath: 'assets/images/body_circumference/7_forearms.png',
-    description:
-        'Circumference of the forearm at its widest point. Reflects grip strength development and lower arm hypertrophy.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Waist',
-    aliases: ['Waist'],
-    color: Color(0xFF9467BD),
-    icon: Icons.straighten,
-    assetPath: 'assets/images/body_circumference/5_waist.png',
-    description:
-        'Circumference at the narrowest torso point, typically at the navel or just above the iliac crest. It is a key health-risk indicator.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Hips',
-    aliases: ['Hips', 'Hip'],
-    color: Color(0xFF8C564B),
-    icon: Icons.directions_walk,
-    assetPath: 'assets/images/body_circumference/6_hips.png',
-    description:
-        'Circumference at the widest point of the hips and glutes. Often paired with waist measurement for waist-to-hip ratio tracking.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Thighs',
-    aliases: ['Thighs', 'Thigh'],
-    color: Color(0xFF6CE7E3),
-    icon: Icons.directions_walk,
-    assetPath: 'assets/images/body_circumference/8_thighs.png',
-    description:
-        'Circumference of the upper thigh at its widest point. Tracks quadriceps, hamstring, and adductor hypertrophy.',
-  ),
-  BodyCircumferenceSeries(
-    key: 'Calves',
-    aliases: ['Calves', 'Calf', 'Legs', 'Leg'],
-    color: Color(0xFFBCBD22),
-    icon: Icons.directions_run,
-    assetPath: 'assets/images/body_circumference/9_legs.png',
-    description:
-        'Circumference of the calf muscle at its fullest point. A useful lower-leg development marker that is often resistant to change.',
-  ),
-];
-
-BodyCircumferenceSeries? _bodyCircumferenceSeriesForKey(String key) {
-  for (final series in _bodyCircumferenceSeries) {
-    if (series.key == key || series.aliases.contains(key)) {
-      return series;
-    }
-  }
-  return null;
-}
-
-Map<String, dynamic> _normalizeBodyCircumferenceData(
-    Map<String, dynamic> rawData) {
-  final normalized = <String, dynamic>{};
-  for (final series in _bodyCircumferenceSeries) {
-    for (final alias in series.aliases) {
-      if (rawData.containsKey(alias)) {
-        normalized[series.key] = rawData[alias];
-        break;
-      }
-    }
-  }
-  return normalized;
-}
-
-abstract class BodyPartVisibilityEvent extends Equatable {
-  const BodyPartVisibilityEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class ToggleBodyPartVisibility extends BodyPartVisibilityEvent {
-  final String bodyPart;
-
-  const ToggleBodyPartVisibility(this.bodyPart);
-
-  @override
-  List<Object?> get props => [bodyPart];
-}
-
-class BodyPartVisibilityState extends Equatable {
-  final Set<String> availableBodyParts;
-  final Set<String> hiddenBodyParts;
-
-  const BodyPartVisibilityState({
-    required this.availableBodyParts,
-    this.hiddenBodyParts = const {},
-  });
-
-  BodyPartVisibilityState copyWith({
-    Set<String>? availableBodyParts,
-    Set<String>? hiddenBodyParts,
-  }) {
-    return BodyPartVisibilityState(
-      availableBodyParts: availableBodyParts ?? this.availableBodyParts,
-      hiddenBodyParts: hiddenBodyParts ?? this.hiddenBodyParts,
-    );
-  }
-
-  bool isVisible(String bodyPart) => !hiddenBodyParts.contains(bodyPart);
-
-  @override
-  List<Object?> get props => [
-        availableBodyParts.toList()..sort(),
-        hiddenBodyParts.toList()..sort(),
-      ];
-}
-
-class BodyPartVisibilityBloc
-    extends Bloc<BodyPartVisibilityEvent, BodyPartVisibilityState> {
-  BodyPartVisibilityBloc({
-    required Iterable<String> availableBodyParts,
-  }) : super(
-          BodyPartVisibilityState(
-            availableBodyParts: Set<String>.from(availableBodyParts),
-          ),
-        ) {
-    on<ToggleBodyPartVisibility>(_onToggleBodyPartVisibility);
-  }
-
-  void _onToggleBodyPartVisibility(
-    ToggleBodyPartVisibility event,
-    Emitter<BodyPartVisibilityState> emit,
-  ) {
-    if (!state.availableBodyParts.contains(event.bodyPart)) {
-      return;
-    }
-
-    final nextHiddenBodyParts = Set<String>.from(state.hiddenBodyParts);
-    if (nextHiddenBodyParts.contains(event.bodyPart)) {
-      nextHiddenBodyParts.remove(event.bodyPart);
-    } else {
-      nextHiddenBodyParts.add(event.bodyPart);
-    }
-
-    emit(state.copyWith(hiddenBodyParts: nextHiddenBodyParts));
   }
 }
 
@@ -482,6 +252,82 @@ class _TraineePublicProfileScreenState
             '$label  ·  $score / 100',
             style: TextStyle(
                 color: color, fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Map<String, dynamic> _metricMapFrom(dynamic value) {
+    if (value is! Map) return const {};
+    return value.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  Widget _bodyMetricButton({
+    required String label,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback? onTap,
+  }) {
+    final enabled = onTap != null;
+    return TnTPremiumCard(
+      onTap: onTap,
+      elevated: false,
+      muted: !enabled,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      accentColor: enabled ? color : null,
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: enabled ? 0.14 : 0.06),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: color.withValues(alpha: enabled ? 0.32 : 0.14),
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: enabled ? color : AppTheme.textSecondary,
+              size: 19,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color:
+                        enabled ? AppTheme.textPrimary : AppTheme.textSecondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppTheme.textSecondary.withValues(alpha: 0.82),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.chevron_right,
+            color: enabled
+                ? AppTheme.textSecondary
+                : AppTheme.textSecondary.withValues(alpha: 0.35),
+            size: 20,
           ),
         ],
       ),
@@ -943,6 +789,10 @@ class _TraineePublicProfileScreenState
                 ? dietSummary
                 : context.l10n.flexibleNoRestrictions,
           ];
+    final bodyCompositionData = _metricMapFrom(
+      trainee['bodyComp'] ?? trainee['bodyComposition'],
+    );
+    final bodyCircumferenceData = _metricMapFrom(trainee['circumferences']);
 
     final dob = trainee['dob'] as DateTime?;
     final int? age = dob != null ? _computeAge(dob) : null;
@@ -1139,6 +989,57 @@ class _TraineePublicProfileScreenState
                           AppUtils.showToast(context, 'Invitation sent!');
                         },
                       ),
+                      if (bodyCompositionData.isNotEmpty ||
+                          bodyCircumferenceData.isNotEmpty) ...[
+                        _sectionDivider(),
+                        _sectionHeader('Body Metrics',
+                            icon: Icons.monitor_heart_outlined),
+                        _bodyMetricButton(
+                          label: context.l10n.bodyComposition,
+                          subtitle: 'Review body composition and trends',
+                          icon: Icons.insights_outlined,
+                          color: AppTheme.cardBlue,
+                          onTap: bodyCompositionData.isEmpty
+                              ? null
+                              : () {
+                                  HapticFeedback.selectionClick();
+                                  Navigator.push(
+                                    context,
+                                    AppRoutes.noTransitionRoute(
+                                      _ReadOnlyStatsScreen(
+                                        title: context.l10n.bodyComposition,
+                                        data: bodyCompositionData,
+                                      ),
+                                    ),
+                                  );
+                                },
+                        ),
+                        const SizedBox(height: 10),
+                        _bodyMetricButton(
+                          label: context.l10n.circumferences,
+                          subtitle: 'Review circumference measurements',
+                          icon: Icons.straighten,
+                          color: AppTheme.cardGreen,
+                          onTap: bodyCircumferenceData.isEmpty
+                              ? null
+                              : () {
+                                  HapticFeedback.selectionClick();
+                                  Navigator.push(
+                                    context,
+                                    AppRoutes.noTransitionRoute(
+                                      BodyCircumferenceTrackerScreen(
+                                        title: context.l10n.circumferences,
+                                        data: bodyCircumferenceData,
+                                        measurementUnit:
+                                            appState.measurementUnit == 'metric'
+                                                ? 'cm'
+                                                : 'in',
+                                      ),
+                                    ),
+                                  );
+                                },
+                        ),
+                      ],
                       _sectionDivider(),
                       _sectionHeader(context.l10n.trainingGoals,
                           icon: Icons.flag_outlined),
@@ -1156,7 +1057,8 @@ class _TraineePublicProfileScreenState
                       const SizedBox(height: 20),
                       _subLabel(context.l10n.pastInjuries),
                       const SizedBox(height: 10),
-                      _buildChipList(context, pastInjuries, AppTheme.cardYellow),
+                      _buildChipList(
+                          context, pastInjuries, AppTheme.cardYellow),
                       const SizedBox(height: 20),
                       _subLabel(context.l10n.medicalConditions),
                       const SizedBox(height: 10),
@@ -1716,7 +1618,7 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
     if (!widget.isCircumference) {
       return widget.data;
     }
-    return _normalizeBodyCircumferenceData(widget.data);
+    return normalizeBodyCircumferenceData(widget.data);
   }
 
   Set<String> get _hiddenKeys => _bodyPartVisibilityBloc.state.hiddenBodyParts;
@@ -1806,7 +1708,7 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
 
   Color _getColor(int indexInSortedKeys, {String? key}) {
     if (widget.isCircumference && key != null) {
-      final series = _bodyCircumferenceSeriesForKey(key);
+      final series = bodyCircumferenceSeriesForKey(key);
       if (series != null) {
         return series.color;
       }
@@ -1837,11 +1739,11 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
     if (!widget.isCircumference) {
       return BodyCompData.iconFor(key);
     }
-    return _bodyCircumferenceSeriesForKey(key)?.icon ?? Icons.straighten;
+    return bodyCircumferenceSeriesForKey(key)?.icon ?? Icons.straighten;
   }
 
   String _circAssetPath(String key) {
-    return _bodyCircumferenceSeriesForKey(key)?.assetPath ??
+    return bodyCircumferenceSeriesForKey(key)?.assetPath ??
         'assets/images/body_circumference/1_cleidomastoids.png';
   }
 
@@ -1882,7 +1784,7 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
                       children: [
                         Text(
                             widget.isCircumference
-                                ? (_bodyCircumferenceSeriesForKey(key)
+                                ? (bodyCircumferenceSeriesForKey(key)
                                         ?.localizedLabel(context) ??
                                     key)
                                 : key,
@@ -1923,7 +1825,7 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
 
   String _circDescription(String key) {
     final normalizedDescription =
-        _bodyCircumferenceSeriesForKey(key)?.description;
+        bodyCircumferenceSeriesForKey(key)?.description;
     if (normalizedDescription != null) {
       return normalizedDescription;
     }
@@ -2061,7 +1963,7 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
                                         horizontal: 6),
                                     child: Text(
                                         widget.isCircumference
-                                            ? (_bodyCircumferenceSeriesForKey(
+                                            ? (bodyCircumferenceSeriesForKey(
                                                         key)
                                                     ?.localizedLabel(context) ??
                                                 key)
@@ -2358,7 +2260,7 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
                                       ),
                                       TextSpan(
                                         text: widget.isCircumference
-                                            ? (_bodyCircumferenceSeriesForKey(
+                                            ? (bodyCircumferenceSeriesForKey(
                                                         key)
                                                     ?.localizedLabel(context) ??
                                                 key)
@@ -2394,76 +2296,97 @@ class _ReadOnlyStatsScreenState extends State<_ReadOnlyStatsScreen> {
               ),
             ),
 
-            // ── CHANGE 5: Legend chips are now tappable toggles ──────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                runAlignment: WrapAlignment.center,
-                children: List.generate(allKeys.length, (i) {
-                  final key = allKeys[i];
-                  final color = _getColor(i, key: key);
-                  final isHidden = !state.isVisible(key);
-                  final iconData = widget.isCircumference
-                      ? _iconFor(key)
-                      : BodyCompData.iconFor(key);
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      context
-                          .read<BodyPartVisibilityBloc>()
-                          .add(ToggleBodyPartVisibility(key));
-                    },
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 180),
-                      opacity: isHidden ? 0.45 : 1,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: isHidden
-                              ? AppTheme.surface
-                              : color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isHidden
-                                ? AppTheme.divider
-                                : color.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isHidden
-                                  ? Icons.visibility_off_outlined
-                                  : iconData,
-                              color: isHidden ? AppTheme.textSecondary : color,
-                              size: 13,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              widget.isCircumference
-                                  ? (_bodyCircumferenceSeriesForKey(key)
-                                          ?.localizedLabel(context) ??
-                                      key)
-                                  : key,
-                              style: TextStyle(
-                                color:
-                                    isHidden ? AppTheme.textSecondary : color,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+            // ── Legend / filter tags — icon + text, left-aligned, horizontally scrollable ──
+            Container(
+              margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius:
+                    BorderRadius.circular(AppConstants.kDefaultBorderRadius),
+                border: Border.all(color: AppTheme.divider),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: List.generate(allKeys.length, (i) {
+                    final key = allKeys[i];
+                    final color = _getColor(i, key: key);
+                    final isHidden = !state.isVisible(key);
+                    final iconData = widget.isCircumference
+                        ? _iconFor(key)
+                        : BodyCompData.iconFor(key);
+                    final label = widget.isCircumference
+                        ? (bodyCircumferenceSeriesForKey(key)
+                                ?.localizedLabel(context) ??
+                            key)
+                        : key;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: i < allKeys.length - 1 ? 6 : 0),
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          context
+                              .read<BodyPartVisibilityBloc>()
+                              .add(ToggleBodyPartVisibility(key));
+                        },
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 180),
+                          opacity: isHidden ? 0.4 : 1.0,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isHidden
+                                  ? AppTheme.surfaceLow
+                                  : color.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isHidden
+                                    ? AppTheme.outlineSoft
+                                    : color.withValues(alpha: 0.35),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  iconData,
+                                  color:
+                                      isHidden ? AppTheme.textTertiary : color,
+                                  size: 13,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  label,
+                                  style: TextStyle(
+                                    color: isHidden
+                                        ? AppTheme.textTertiary
+                                        : color,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (isHidden) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.visibility_off_outlined,
+                                    color: AppTheme.textTertiary,
+                                    size: 10,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
             ),
           ],
